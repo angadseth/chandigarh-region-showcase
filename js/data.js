@@ -117,11 +117,11 @@ window.CRS = {
     { id: "kaziranga", name: "Kaziranga", rc: "Abhimanyu Kumar Patel", photo: "assets/people/abhimanyu.webp", head: [0.374, 0.293, 0.19], tint: "#2a7a5c" },
     { id: "sundarbans", name: "Sundarbans", rc: "Prashansa Uniyal", photo: null, tint: "#c8873a" },
     { id: "nallamala", name: "Nallamala", rc: "Akshi", photo: null, tint: "#8a5a7a" },
-    { id: "bandipur", name: "Bandipur", rc: "Jiyaa", photo: null, tint: "#3b7fc4" },
+    { id: "bandipur", name: "Bandipur", rc: "Jiyaa", photo: "assets/people/bandipur.webp", head: [0.503, 0.4, 0.17], tint: "#3b7fc4" },
     { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, tint: "#c47a4a" },
     { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", head: [0.491, 0.293, 0.234], tint: "#7b3fe0" },
     { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: "assets/people/corbett.webp", head: [0.535, 0.296, 0.206], tint: "#c39a2e" },
     { id: "wayanad", name: "Wayanad", rc: "Sagar Rathore", photo: null, tint: "#2f95b8" },
-    { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: null, tint: "#a88a4a" }
+    { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: "assets/people/saranda.webp", head: [0.457, 0.31, 0.2], tint: "#a88a4a" }
   ]
 };
