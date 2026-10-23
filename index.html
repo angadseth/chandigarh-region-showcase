@@ -78,7 +78,12 @@
       <div class="council" id="council" aria-label="Regional Coordinators of the Chandigarh Region"></div>
       <div class="cover__bar">
         <p class="cover__lines"><b data-count-inline="meetups"></b> meetups <i>/</i> <b data-count-inline="cities"></b> cities <i>/</i> <b>10</b> houses</p>
-        <div class="crests" id="crests"></div>
+        <div class="cover__nav">
+          <button data-step="-1" aria-label="Previous coordinator">←</button>
+          <div class="crests" id="crests"></div>
+          <button data-step="1" aria-label="Next coordinator">→</button>
+          <span class="cover__progress" aria-hidden="true"><i></i></span>
+        </div>
         <a class="cover__scroll" href="#reel">Scroll <span aria-hidden="true">↓</span></a>
       </div>
     </section>

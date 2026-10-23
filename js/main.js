@@ -242,11 +242,6 @@
         <span class="plate__k"><i id="stageNo"></i><em id="stageHouse"></em></span>
         <b class="plate__name" id="stageRc"></b>
         <div class="plate__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${ICONS[t] || ""}${t}</a>`).join("")}</div>
-        <div class="plate__nav">
-          <button data-step="-1" aria-label="Previous coordinator">←</button>
-          <span class="plate__bar"><i></i></span>
-          <button data-step="1" aria-label="Next coordinator">→</button>
-        </div>
       </div>
     </div>`);
   const plate = $(".plate"), floatCrest = $(".plate__crest"), plateLinks = $(".plate__links");
@@ -317,7 +312,7 @@
   const tick = () => {
     if (timer) timer.kill();
     if (!motionOK || cast.length < 2) return;
-    const bar = $(".plate__bar i");
+    const bar = $(".cover__progress i");
     timer = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: DWELL, ease: "none", paused, onComplete: () => go(active + 1) });
   };
   const go = (to) => {
@@ -355,7 +350,7 @@
     figs.forEach((f, i) => place(f, dist(i), "set"));
     dress();
   });
-  plate.addEventListener("click", (e) => { const nav = e.target.closest("[data-step]"); if (nav) go(active + +nav.dataset.step); });
+  $(".cover__nav").addEventListener("click", (e) => { const nav = e.target.closest("[data-step]"); if (nav) go(active + +nav.dataset.step); });
   council.addEventListener("click", (e) => {
     const f = e.target.closest(".rc");
     if (f && !f.classList.contains("is-active")) go(+f.dataset.rc);
