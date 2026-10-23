@@ -227,7 +227,7 @@
   const council = $("#council");
   const figs = cast.map((hs, i) => {
     const fig = h("figure", { class: "rc", "data-rc": i, "aria-label": `${hs.rc}, ${hs.name} House` },
-      `<img class="rc__img" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House"><span class="rc__name">${hs.rc.split(" ")[0]}</span>`);
+      `<div class="rc__body"><img class="rc__img rc__img--bw" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House"><img class="rc__img rc__img--col" src="${hs.photo}" alt="" aria-hidden="true"></div><span class="rc__name">${hs.rc.split(" ")[0]}</span>`);
     council.append(fig);
     return fig;
   });
@@ -245,13 +245,13 @@
   const motionOK = hasGsap && !reduced;
   let active = 0, geo = null, timer = null, paused = false, started = false;
 
-  // slot for a circular distance d (positive = to the left of centre, so Kaziranga waits on the lead's left)
+  // slot for a circular distance d (positive = to the right of centre, so whoever is next waits on the right and walks in)
   const slot = (d) => {
     const phone = innerWidth <= 600, a = Math.abs(d), s = Math.sign(d);
     const xs = phone ? [0, .36, .52] : [0, .25, .385, .48, .56];
     const sc = phone ? [1, .52, .4] : [1, .7, .57, .48, .42];
     const max = xs.length - 1, k = Math.min(a, max);
-    return { x: -s * xs[k] * geo.W, scale: sc[k], opacity: a >= max ? 0 : a > 1 && a === max - 1 ? .7 : 1, z: 30 - a * 2 };
+    return { x: s * xs[k] * geo.W, scale: sc[k], opacity: a >= max ? 0 : a > 1 && a === max - 1 ? .7 : 1, z: 30 - a * 2 };
   };
   const dist = (i, at = active) => { const n = cast.length; let d = ((i - at) % n + n) % n; if (d > n / 2) d -= n; return d; };
   const measure = () => {
@@ -279,7 +279,7 @@
       else Object.assign(f.style, { transform: `translateX(-50%) translateX(${x}px) scale(${s.scale})`, opacity: s.opacity });
     } else if (how === "jump") {
       // crossing behind the stage would look wrong: fade out, reappear on the far side
-      gsap.timeline().to(f, { opacity: 0, duration: .9, ease: "sine.in" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: 1.3, ease: "sine.out" }, "+=.4");
+      gsap.timeline().to(f, { opacity: 0, duration: .5, ease: "sine.in", overwrite: "auto" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: .9, ease: "sine.out" }, "+=.15");
     } else gsap.to(f, { ...to, duration: MOVE, ease: "power2.inOut", overwrite: "auto" });
   };
   const dress = () => {
@@ -288,7 +288,7 @@
     plateLinks.hidden = !hs.featured;
     $("#stageNo").textContent = `${dd(active + 1)} / ${dd(cast.length)}`;
     $("#stageHouse").textContent = `${hs.name} House`;
-    $("#stageRc").innerHTML = [...hs.rc].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
+    $("#stageRc").innerHTML = [...(hs.short || hs.rc)].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
     $$("#crests a").forEach((a) => a.classList.toggle("is-on", a.dataset.house === hs.id));
   };
   // a floating name that would run into the nameplate steps aside
@@ -305,17 +305,17 @@
     motionOK ? gsap.delayedCall(.8, declutter) : declutter();
     if (!motionOK) { plate.style.opacity = 1; return; }
     gsap.set(plate, { opacity: 1 });
-    gsap.fromTo("#stageRc .ch", { opacity: 0, yPercent: 45, filter: "blur(10px)" }, { opacity: 1, yPercent: 0, filter: "blur(0px)", duration: 1.5, stagger: .055, ease: "power3.out" });
-    gsap.fromTo([".plate__k", plateLinks], { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 1.2, stagger: .15, ease: "power2.out", delay: .25 });
-    gsap.fromTo(floatCrest, { opacity: 0, y: 34, rotate: -22, scale: .6 }, { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 2, ease: "power3.out" });
+    gsap.fromTo("#stageRc .ch", { opacity: 0, yPercent: 40, filter: "blur(6px)" }, { opacity: 1, yPercent: 0, filter: "blur(0px)", duration: 1, stagger: .035, ease: "power3.out", clearProps: "filter" });
+    gsap.fromTo([".plate__k", plateLinks], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .9, stagger: .1, ease: "power2.out", delay: .15 });
+    gsap.fromTo(floatCrest, { opacity: 0, y: 28, rotate: -18, scale: .7 }, { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 1.3, ease: "power3.out" });
   };
   const conceal = () => {
     if (!motionOK) return;
-    gsap.to(floatCrest, { opacity: 0, y: -24, rotate: 18, scale: .85, duration: .8, ease: "sine.in" });
-    gsap.to("#stageRc .ch", { opacity: 0, yPercent: -35, filter: "blur(8px)", duration: .7, stagger: .03, ease: "sine.in" });
-    gsap.to([".plate__k", plateLinks], { opacity: 0, y: -8, duration: .6, ease: "sine.in" });
+    gsap.to(floatCrest, { opacity: 0, y: -18, rotate: 14, scale: .9, duration: .45, ease: "sine.in" });
+    gsap.to("#stageRc .ch", { opacity: 0, yPercent: -30, filter: "blur(6px)", duration: .4, stagger: .015, ease: "sine.in" });
+    gsap.to([".plate__k", plateLinks], { opacity: 0, y: -6, duration: .35, ease: "sine.in" });
   };
-  const DWELL = 5, MOVE = 2.4;
+  const DWELL = 5, MOVE = 1.5;
   let revealCall = null, settleCall = null;
   const tick = () => {
     if (timer) timer.kill();
@@ -342,7 +342,7 @@
       if (settleCall) settleCall.kill();
       settleCall = gsap.delayedCall(MOVE, () => { declutter(); council.classList.remove("is-moving"); });
     }
-    motionOK ? (revealCall = gsap.delayedCall(1.15, reveal)) : reveal();
+    motionOK ? (revealCall = gsap.delayedCall(.5, reveal)) : reveal();
     tick();
   };
   let stageReady;
@@ -378,7 +378,7 @@
   council.addEventListener("touchend", (e) => {
     if (sx === null) return;
     const dx = e.changedTouches[0].clientX - sx; sx = null;
-    if (Math.abs(dx) > 40) go(active + (dx > 0 ? 1 : -1));
+    if (Math.abs(dx) > 40) go(active + (dx < 0 ? 1 : -1));
   });
   // hold the carousel while the cover is off screen or the tab is hidden
   new IntersectionObserver(([en]) => { if (!timer) return; en.isIntersecting && !paused ? timer.resume() : timer.pause(); }).observe(council);
@@ -700,7 +700,7 @@
   gsap.set(".mast__word .ch", { yPercent: 115 });
   gsap.set(".mast__region .ch", { yPercent: 115 });
   gsap.set(".cover__bar", { opacity: 0, y: 18 });
-  gsap.set(".rc__img", { yPercent: 24, opacity: 0 });
+  gsap.set(".rc__body", { yPercent: 24, opacity: 0 });
   gsap.set(".cover__plan", { opacity: 0, scale: 1.08 });
   gsap.set([".brand", ".top__right"], { opacity: 0 });
 
@@ -711,7 +711,7 @@
     tl.to(".cover__plan", { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0)
       .to(".mast__word .ch", { yPercent: 0, duration: 1.5, stagger: .045 }, .1)
       .to(".mast__region .ch", { yPercent: 0, duration: 1.2, stagger: .05 }, .55)
-      .to(rcs.map((f) => $(".rc__img", f)), { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(dist(i)) * .14 }, .6)
+      .to(rcs.map((f) => $(".rc__body", f)), { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(dist(i)) * .14 }, .6)
       .add(startStage, 1.7)
       .to([".brand", ".top__right"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
       .to(".cover__bar", { opacity: 1, y: 0, duration: 1.1 }, 1.3);
