@@ -286,27 +286,27 @@
       `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div></div>`);
   }));
 
-  /* ---------- Gallery marquee ---------- */
+  /* ---------- The Wall ---------- */
   const all = D.meetups.flatMap((m, i) => Array.from({ length: m.photos }, (_, k) => [i, k + 1]));
   const ours = all.filter(([i]) => D.meetups[i].host === "Pichavaram");
   const rest = all.filter(([i]) => D.meetups[i].host !== "Pichavaram");
   const mixed = rest.map((x, i) => [x, (i * 7919) % rest.length]).sort((a, b) => a[1] - b[1]).map((x) => x[0]);
-  // Pichavaram's photos open both rows, alternating
-  const shuffled = [];
-  const half0 = Math.ceil(all.length / 2);
-  const rowA = [], rowB = [];
-  ours.forEach((x, k) => (k % 2 ? rowB : rowA).push(x));
-  mixed.forEach((x) => (rowA.length < half0 ? rowA : rowB).push(x));
-  shuffled.push(...rowA, ...rowB);
-  const half = rowA.length;
+  // three rows; Pichavaram's photos open every row, then the rest is dealt round-robin
+  const wallRows = [[], [], []];
+  [...ours, ...mixed].forEach((x, k) => wallRows[k % 3].push(x));
   const marquee = $("#marquee");
-  [shuffled.slice(0, half), shuffled.slice(half)].forEach((set, r) => {
-    const row = h("div", { class: "mq-row", "data-dir": r ? "1" : "-1" });
-    const make = ([i, k], dup) => h("button", { "data-i": i, "data-p": k, "data-cursor": "View", tabindex: dup ? "-1" : "0", "aria-hidden": dup ? "true" : false, "aria-label": `${D.meetups[i].city} photo` },
-      `<img src="${photo(D.meetups[i], k)}" alt="" loading="lazy" decoding="async">`);
-    row.append(...set.map((x) => make(x, false)), ...set.map((x) => make(x, true)));
+  wallRows.forEach((set, r) => {
+    const row = h("div", { class: "mq-row", "data-dir": r % 2 ? "1" : "-1", "data-speed": [.7, .55, .85][r] });
+    const make = ([i, k], n, dup) => {
+      const m = D.meetups[i], { m: mo, d } = parse(m.date);
+      return h("button", { class: n % 5 === 2 ? "is-wide" : "", "data-i": i, "data-p": k, "data-cursor": "View", tabindex: dup ? "-1" : "0", "aria-hidden": dup ? "true" : false, "aria-label": `${m.city} photo` },
+        `<img src="${photo(m, k)}" alt="" loading="lazy" decoding="async"><span class="mq-cap"><b>${m.city}</b>${dd(d)} ${MONTHS[mo - 1]}</span>`);
+    };
+    row.append(...set.map((x, n) => make(x, n, false)), ...set.map((x, n) => make(x, n, true)));
     marquee.append(row);
   });
+  const wallCount = $("#wallCount");
+  if (wallCount) wallCount.textContent = all.length;
 
   /* ---------- Lightbox ---------- */
   const lb = $("#lb"), lbImg = $("#lbImg");
@@ -452,25 +452,29 @@
     loop();
   }
 
-  /* ---------- Marquee motion ---------- */
+  /* ---------- Wall motion: always drifting, faster and skewed while you scroll ---------- */
   const rows = $$(".mq-row");
   if (!reduced) {
-    const state = rows.map((r) => ({ r, x: 0, dir: +r.dataset.dir, speed: .35, target: .35 }));
+    const state = rows.map((r) => ({ r, x: 0, dir: +r.dataset.dir, base: +r.dataset.speed, speed: +r.dataset.speed, target: +r.dataset.speed }));
     rows.forEach((r, k) => {
-      r.addEventListener("pointerenter", () => (state[k].target = .06));
-      r.addEventListener("pointerleave", () => (state[k].target = .35));
+      r.addEventListener("pointerenter", () => (state[k].target = .08));
+      r.addEventListener("pointerleave", () => (state[k].target = state[k].base));
     });
-    let boost = 0;
-    if (lenis) lenis.on("scroll", ({ velocity }) => (boost = Math.min(Math.abs(velocity) * .25, 4)));
+    let boost = 0, skew = 0, visible = true;
+    if (lenis) lenis.on("scroll", ({ velocity }) => (boost = Math.max(-6, Math.min(velocity * .35, 6))));
+    new IntersectionObserver(([en]) => (visible = en.isIntersecting), { rootMargin: "200px" }).observe(marquee);
     const tick = () => {
-      state.forEach((s) => {
-        s.speed += (s.target - s.speed) * .08;
-        const w = s.r.scrollWidth / 2;
-        s.x += (s.speed + boost) * s.dir;
-        if (s.dir < 0 && s.x <= -w) s.x += w;
-        if (s.dir > 0 && s.x >= 0) s.x -= w;
-        s.r.style.transform = `translate3d(${s.x}px,0,0)`;
-      });
+      if (visible) {
+        skew += (boost * .6 - skew) * .1;
+        state.forEach((s) => {
+          s.speed += (s.target - s.speed) * .08;
+          const w = s.r.scrollWidth / 2;
+          s.x += (s.speed + Math.abs(boost)) * s.dir;
+          if (s.x <= -w) s.x += w;
+          if (s.x >= 0) s.x -= w;
+          s.r.style.transform = `translate3d(${s.x}px,0,0) skewX(${-skew * s.dir}deg)`;
+        });
+      }
       boost *= .92;
       requestAnimationFrame(tick);
     };
