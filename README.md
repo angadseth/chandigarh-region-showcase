@@ -27,6 +27,8 @@ Everything on the page comes from [`js/data.js`](js/data.js):
 
 Plain HTML, CSS and JavaScript. No build step. [GSAP](https://gsap.com) + ScrollTrigger for motion, [Lenis](https://lenis.darkroom.engineering) for smooth scroll. Type is Instrument Serif, Geist and Geist Mono.
 
+After changing CSS or JS, bump the `?v=` on their links in `index.html` so browsers fetch the new files.
+
 Run it locally with any static server:
 
 ```sh
