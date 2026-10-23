@@ -115,13 +115,13 @@ window.CRS = {
     { id: "pichavaram", name: "Pichavaram", rc: "Angad Jangir", photo: "assets/people/angad.webp", tint: "#c9a24e", featured: true,
       line: "Designed and built this showcase. Hosted the region's first-ever Sikar meetup, Jantar Mantar and the Albert Hall photowalk." },
     { id: "kaziranga", name: "Kaziranga", rc: "Abhimanyu Kumar Patel", photo: "assets/people/abhimanyu.webp", tint: "#2a7a5c" },
-    { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", tint: "#7b3fe0" },
-    { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: null, tint: "#c39a2e" },
-    { id: "wayanad", name: "Wayanad", rc: "Sagar Rathore", photo: null, tint: "#2f95b8" },
-    { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: null, tint: "#a88a4a" },
     { id: "sundarbans", name: "Sundarbans", rc: "Prashansa Uniyal", photo: null, tint: "#c8873a" },
     { id: "nallamala", name: "Nallamala", rc: "Akshi", photo: null, tint: "#8a5a7a" },
     { id: "bandipur", name: "Bandipur", rc: "Jiyaa", photo: null, tint: "#3b7fc4" },
-    { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, tint: "#c47a4a" }
+    { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, tint: "#c47a4a" },
+    { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", tint: "#7b3fe0" },
+    { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: null, tint: "#c39a2e" },
+    { id: "wayanad", name: "Wayanad", rc: "Sagar Rathore", photo: null, tint: "#2f95b8" },
+    { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: null, tint: "#a88a4a" }
   ]
 };
