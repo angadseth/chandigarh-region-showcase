@@ -6,7 +6,7 @@ What the Chandigarh Region of the IIT Madras BS Degree did this tenure: 32 offli
 
 ## What's inside
 
-- **Cover**: a magazine masthead over Chandigarh's sector plan, with the region's coordinators standing in front of it
+- **Cover**: a magazine masthead over Chandigarh's sector plan; the coordinators turn like a slow carousel, one in colour at the centre every five seconds, with their name ringed around their head and their house crest floating beside them
 - **Reel**: the first-ever Sikar meetup, opening from a framed print to full bleed
 - **Meetups** grouped by date, filterable by kind, each opening a photo lightbox with a link to the original post
 - **Spotlight** on *Chai, Baarish aur Baatcheet* Season 2: eight cities on one Sunday
@@ -20,7 +20,7 @@ What the Chandigarh Region of the IIT Madras BS Degree did this tenure: 32 offli
 Everything on the page comes from [`js/data.js`](js/data.js):
 
 - Add a YouTube recording: push `{ title: "Game Night", url: "https://youtu.be/…" }` into `videos` and the Recordings block appears.
-- Add a coordinator's photo: drop a WebP into `assets/people/` and set `photo` on that house. Coordinators with a photo join the cover lineup automatically.
+- Add a coordinator's photo: `python scripts/cutout.py <photo> <house-id>` writes the cut-out to `assets/people/`; `python scripts/head.py` prints where the head is. Set `photo` and `head` on that house and they join the cover carousel.
 - Add a meetup: add an entry to `meetups`, then run `python scripts/fetch_instagram.py <post-id>` to pull its photos. A meetup with `photos: 0` shows as a "photos coming" card.
 
 ## Stack
