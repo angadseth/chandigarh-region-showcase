@@ -234,16 +234,22 @@
     council.append(fig);
     return fig;
   });
-  council.insertAdjacentHTML("beforeend", `
-    <div class="halo" aria-hidden="true"><svg viewBox="0 0 200 200"><defs><path id="haloPath" d="M100,100 m-88,0 a88,88 0 1,1 176,0 a88,88 0 1,1 -176,0"/></defs><text><textPath href="#haloPath" id="haloText"></textPath></text></svg></div>
-    <div class="orbit">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener" aria-label="${t}">${ICONS[t] || ""}<span>${t}</span></a>`).join("")}</div>
-    <img class="float-crest" alt="" aria-hidden="true">
-    <div class="stage-name" aria-live="polite">
-      <button class="stage-name__nav" data-step="-1" aria-label="Previous coordinator">←</button>
-      <div class="stage-name__txt"><span class="stage-name__k"><i id="stageNo"></i><em id="stageHouse"></em></span><b id="stageRc"></b><span class="stage-name__bar"><i></i></span></div>
-      <button class="stage-name__nav" data-step="1" aria-label="Next coordinator">→</button>
+  // the nameplate answers "Region" on the other side of the masthead, well clear of every face
+  $(".mast").insertAdjacentHTML("beforeend", `
+    <div class="plate" aria-live="polite">
+      <img class="plate__crest" alt="" aria-hidden="true">
+      <div class="plate__txt">
+        <span class="plate__k"><i id="stageNo"></i><em id="stageHouse"></em></span>
+        <b class="plate__name" id="stageRc"></b>
+        <div class="plate__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${ICONS[t] || ""}${t}</a>`).join("")}</div>
+        <div class="plate__nav">
+          <button data-step="-1" aria-label="Previous coordinator">←</button>
+          <span class="plate__bar"><i></i></span>
+          <button data-step="1" aria-label="Next coordinator">→</button>
+        </div>
+      </div>
     </div>`);
-  const halo = $(".halo", council), orbit = $(".orbit", council), floatCrest = $(".float-crest", council), stageName = $(".stage-name", council);
+  const plate = $(".plate"), floatCrest = $(".plate__crest"), plateLinks = $(".plate__links");
   const motionOK = hasGsap && !reduced;
   let active = 0, geo = null, timer = null, paused = false, started = false;
 
@@ -285,49 +291,33 @@
     } else gsap.to(f, { ...to, duration: 1.4, ease: "expo.inOut" });
   };
   const dress = () => {
-    const hs = cast[active], f = figs[active], hd = f._head, ring = hd.r * (innerWidth <= 600 ? 1.2 : 1.28);
-    const cx = geo.W / 2, cy = hd.y;
-    Object.assign(halo.style, { left: `${cx}px`, top: `${cy}px`, width: `${ring * 2}px`, height: `${ring * 2}px` });
-    const label = `${hs.rc} ✦ ${hs.name} House ✦ `.toUpperCase();
-    const txt = $("#haloText");
-    txt.textContent = label.repeat(Math.max(1, Math.round(553 / (label.length * 6.2))));
-    txt.setAttribute("textLength", 550);
-    // links orbit the lead's head on the right; the crest pins to the halo on the upper left
-    const at = (deg, rad) => [cx + Math.cos(deg * Math.PI / 180) * rad, cy + Math.sin(deg * Math.PI / 180) * rad];
-    orbit.hidden = !hs.featured;
-    $$("a", orbit).forEach((a, k) => { const [x, y] = at([-42, -4, 34][k], ring + 6); a.style.left = `${x}px`; a.style.top = `${y}px`; });
-    const [fx, fy] = at(218, ring);
+    const hs = cast[active];
     floatCrest.src = `assets/houses/${hs.id}.webp`;
-    Object.assign(floatCrest.style, { left: `${fx}px`, top: `${fy}px` });
+    plateLinks.hidden = !hs.featured;
     $("#stageNo").textContent = `${dd(active + 1)} / ${dd(cast.length)}`;
     $("#stageHouse").textContent = `${hs.name} House`;
-    const rc = $("#stageRc");
-    rc.innerHTML = [...hs.rc].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
+    $("#stageRc").innerHTML = [...hs.rc].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
     $$("#crests a").forEach((a) => a.classList.toggle("is-on", a.dataset.house === hs.id));
   };
   const reveal = () => {
     dress();
-    if (!motionOK) { [halo, orbit, floatCrest, stageName].forEach((n) => (n.style.opacity = 1)); return; }
-    gsap.fromTo(halo, { opacity: 0, scale: .82, rotate: -30 }, { opacity: 1, scale: 1, rotate: 0, duration: 1.4, ease: "expo.out" });
-    gsap.fromTo($$("a", orbit), { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .9, stagger: .09, ease: "back.out(2)", delay: .25 });
-    gsap.set(orbit, { opacity: 1 });
-    gsap.fromTo(floatCrest, { opacity: 0, x: -70, y: 50, rotate: -35, scale: .5 }, { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1, duration: 1.5, ease: "expo.out", delay: .1 });
-    gsap.set(stageName, { opacity: 1 });
+    if (!motionOK) { plate.style.opacity = 1; return; }
+    gsap.set(plate, { opacity: 1 });
     gsap.fromTo("#stageRc .ch", { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: .03, ease: "expo.out" });
-    gsap.fromTo(".stage-name__k", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .9, ease: "expo.out" });
+    gsap.fromTo([".plate__k", plateLinks], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .9, stagger: .1, ease: "expo.out" });
+    gsap.fromTo(floatCrest, { opacity: 0, y: 40, rotate: -30, scale: .5 }, { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 1.4, ease: "expo.out" });
   };
-  const conceal = (done) => {
-    if (!motionOK) return done();
-    gsap.to([halo, orbit, floatCrest], { opacity: 0, duration: .35, ease: "power2.in" });
-    gsap.to(floatCrest, { y: -40, rotate: 25, duration: .35, ease: "power2.in" });
+  const conceal = () => {
+    if (!motionOK) return;
+    gsap.to(floatCrest, { opacity: 0, y: -30, rotate: 25, duration: .35, ease: "power2.in" });
     gsap.to("#stageRc .ch", { yPercent: -110, duration: .4, stagger: .012, ease: "power2.in" });
-    gsap.to(".stage-name__k", { opacity: 0, duration: .3, onComplete: done });
+    gsap.to([".plate__k", plateLinks], { opacity: 0, duration: .3 });
   };
   const DWELL = 5;
   const tick = () => {
     if (timer) timer.kill();
     if (!motionOK || cast.length < 2) return;
-    const bar = $(".stage-name__bar i");
+    const bar = $(".plate__bar i");
     timer = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: DWELL, ease: "none", paused, onComplete: () => go(active + 1) });
   };
   const go = (to) => {
@@ -336,7 +326,7 @@
     const prev = active;
     figs[prev].classList.remove("is-active");
     figs[next].classList.add("is-active");
-    conceal(() => {});
+    conceal();
     active = next;
     figs.forEach((f, i) => {
       const d0 = dist(i, prev), d1 = dist(i, next);
@@ -365,9 +355,8 @@
     figs.forEach((f, i) => place(f, dist(i), "set"));
     dress();
   });
+  plate.addEventListener("click", (e) => { const nav = e.target.closest("[data-step]"); if (nav) go(active + +nav.dataset.step); });
   council.addEventListener("click", (e) => {
-    const nav = e.target.closest("[data-step]");
-    if (nav) return go(active + +nav.dataset.step);
     const f = e.target.closest(".rc");
     if (f && !f.classList.contains("is-active")) go(+f.dataset.i);
   });

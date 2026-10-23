@@ -224,8 +224,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 [data-split] .ch { display: inline-block; will-change: transform; }
 [data-split] .chw { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
 
-.council { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; height: 59%; touch-action: pan-y; }
-.rc { position: absolute; left: 50%; bottom: 0; height: 100%; margin: 0; opacity: 0; cursor: pointer; will-change: transform, opacity; }
+.council { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; height: 52%; touch-action: pan-y; pointer-events: none; }
+.rc { position: absolute; left: 50%; bottom: 0; height: 100%; margin: 0; opacity: 0; cursor: pointer; pointer-events: auto; will-change: transform, opacity; }
 /* every cut-out is feathered at the sides and the waist so no photo shows a hard crop */
 .rc__img {
   height: 100%; width: auto; max-width: none; display: block;
@@ -249,65 +249,40 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   animation: bob 4.5s ease-in-out infinite;
 }
 .rc.is-near .rc__name { opacity: .55; }
+.rc.is-active .rc__name { opacity: 0; transition: none; }
 .rc.is-near:hover .rc__name { opacity: 1; }
 @keyframes bob { 50% { transform: translateY(-8px); } }
 
-/* the active coordinator: a ring of their name turning behind the head */
-.halo { position: absolute; z-index: 29; translate: -50% -50%; pointer-events: none; opacity: 0; }
-.halo svg { width: 100%; height: 100%; overflow: visible; animation: spin 40s linear infinite; }
-.halo text { font-family: var(--mono); font-size: 9.6px; letter-spacing: .1em; fill: rgba(214, 179, 111, .85); }
-.halo::before { content: ""; position: absolute; inset: 6%; border-radius: 50%; border: 1px solid rgba(214, 179, 111, .22); }
-/* the lead's links orbit the head */
-.orbit { position: absolute; inset: 0; z-index: 40; pointer-events: none; opacity: 0; }
-.orbit a {
-  position: absolute; translate: -50% -50%; pointer-events: auto;
-  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
-  background: rgba(239, 232, 218, .94); color: var(--ink);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(214, 179, 111, .5);
-  transition: background .3s, color .3s, box-shadow .4s;
+/* nameplate for whoever is in the middle, mirrored against "Region" */
+.plate {
+  position: absolute; right: 0; top: 100%; margin-top: .55em; z-index: 3; opacity: 0;
+  display: flex; align-items: center; gap: 18px; text-align: right; font-size: 16px; line-height: 1;
 }
-.orbit a svg { width: 20px; height: 20px; }
-.orbit a span {
-  position: absolute; left: calc(100% + 10px); top: 50%; translate: -4px -50%; white-space: nowrap;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ivory);
-  opacity: 0; transition: opacity .3s, translate .4s var(--ease); pointer-events: none;
-}
-.orbit a:hover { background: var(--gold); box-shadow: 0 12px 30px rgba(0, 0, 0, .45), 0 0 0 6px rgba(214, 179, 111, .2); }
-.orbit a:hover span { opacity: 1; translate: 0 -50%; }
-.orbit[hidden] { display: none; }
-/* their house crest drifts in and floats beside them */
-.float-crest {
-  position: absolute; z-index: 41; width: clamp(64px, 6.4vw, 96px); height: auto; translate: -50% -50%; pointer-events: none; opacity: 0;
-  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .6));
-}
-.float-crest[src] { animation: drift 6s ease-in-out infinite; }
-@keyframes drift { 0%, 100% { margin-top: 0; } 50% { margin-top: -14px; } }
-/* name plate across the chest */
-.stage-name {
-  position: absolute; left: 50%; bottom: clamp(88px, 12vh, 124px); z-index: 45; translate: -50% 0;
-  display: flex; align-items: center; gap: clamp(12px, 2vw, 26px); opacity: 0;
-}
-.stage-name__txt { display: grid; justify-items: center; gap: 8px; }
-.stage-name__k {
-  display: flex; gap: 12px; white-space: nowrap; padding: 6px 12px; border-radius: 999px; background: rgba(11, 10, 9, .62);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold);
-}
-.stage-name__k i { font-style: normal; color: var(--ivory-2); }
-.stage-name__k em { font-style: normal; }
-.stage-name b {
-  display: block; white-space: nowrap; font-family: var(--serif); font-weight: 400;
-  font-size: clamp(40px, 5vw, 76px); line-height: 1; letter-spacing: -.02em; color: var(--ivory);
-  text-shadow: 0 6px 40px rgba(0, 0, 0, .75);
-}
-.stage-name__bar { display: block; width: 120px; height: 1.5px; background: rgba(239, 232, 218, .18); overflow: hidden; border-radius: 2px; }
-.stage-name__bar i { display: block; height: 100%; background: var(--gold); transform-origin: 0 50%; transform: scaleX(0); }
-.stage-name__nav {
-  width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(11, 10, 9, .55);
-  color: var(--ivory); font-size: 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+.plate__crest { order: -1; width: clamp(54px, 5vw, 74px); height: auto; filter: drop-shadow(0 14px 24px rgba(0, 0, 0, .55)); animation: drift 6s ease-in-out infinite; }
+@keyframes drift { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+.plate__txt { display: grid; justify-items: end; gap: 9px; }
+.plate__k { display: flex; gap: 12px; white-space: nowrap; font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.plate__k i { font-style: normal; color: var(--mute); }
+.plate__k em { font-style: normal; }
+.plate__name { display: block; white-space: nowrap; font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 2.7vw, 42px); letter-spacing: -.01em; color: var(--ivory); }
+.plate__links { display: flex; gap: 6px; }
+.plate__links[hidden] { display: none; }
+.plate__links a {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px 6px 8px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: rgba(11, 10, 9, .5); color: var(--ivory-2);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
   transition: background .3s, color .3s, border-color .3s;
 }
-.stage-name__nav:hover { background: var(--ivory); color: var(--ink); border-color: var(--ivory); }
+.plate__links svg { width: 13px; height: 13px; }
+.plate__links a:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+.plate__nav { display: flex; align-items: center; gap: 10px; }
+.plate__nav button {
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); color: var(--ivory-2); font-size: 13px;
+  transition: background .3s, color .3s, border-color .3s;
+}
+.plate__nav button:hover { background: var(--ivory); color: var(--ink); border-color: var(--ivory); }
+.plate__bar { display: block; width: 90px; height: 1.5px; background: rgba(239, 232, 218, .16); overflow: hidden; border-radius: 2px; }
+.plate__bar i { display: block; height: 100%; background: var(--gold); transform-origin: 0 50%; transform: scaleX(0); }
 
 .cover__bar {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 5;
@@ -348,7 +323,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @media (max-width: 900px) {
   .rail { display: none; }
   .top { padding-block: 14px; }
-  .council { height: 58%; }
+  .council { height: 52%; }
   .cover__bar { grid-template-columns: 1fr auto; padding-top: 50px; }
   .crests { grid-column: 1 / -1; grid-row: 1; justify-content: center; flex-wrap: wrap; }
   .crests a { width: 28px; height: 28px; }
@@ -361,16 +336,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .cover__kicker > span:first-child { display: none; }
   .mast__word { font-size: 20.5vw; }
   .mast__region { font-size: 9.5vw; }
-  .council { height: 58%; }
+  .council { height: 50%; }
   .rc__name { display: none; }
-  .orbit a { width: 38px; height: 38px; }
-  .orbit a svg { width: 17px; height: 17px; }
-  .orbit a span { display: none; }
-  .stage-name { bottom: 104px; gap: 10px; }
-  .stage-name b { font-size: 34px; }
-  .stage-name__k { font-size: 9px; letter-spacing: .14em; gap: 8px; }
-  .stage-name__nav { width: 34px; height: 34px; font-size: 13px; }
-  .stage-name__bar { width: 80px; }
+  .plate { margin-top: .4em; gap: 10px; align-items: flex-end; }
+  .plate__crest { width: 40px; }
+  .plate__txt { gap: 7px; }
+  .plate__k { font-size: 8.5px; letter-spacing: .12em; gap: 8px; }
+  .plate__name { font-size: 21px; }
+  .plate__links { gap: 4px; }
+  .plate__links a { font-size: 8.5px; padding: 5px 7px; gap: 4px; }
+  .plate__links svg { width: 11px; height: 11px; }
+  .plate__bar { width: 60px; }
+  .plate__nav button { width: 26px; height: 26px; font-size: 11px; }
   .cover__lines { font-size: 10px; letter-spacing: .1em; }
 }
 
