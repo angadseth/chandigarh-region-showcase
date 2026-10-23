@@ -115,9 +115,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   position: fixed; inset: 0 0 auto; z-index: 60;
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
   padding: 20px var(--gutter);
-  transition: transform .6s var(--ease), background .4s;
 }
-.top.is-hidden { transform: translateY(-110%); }
+.brand, .tenure-tag { transition: opacity .5s var(--ease), translate .6s var(--ease); }
+.top.is-hidden .brand, .top.is-hidden .tenure-tag { opacity: 0; translate: 0 -12px; pointer-events: none; }
 .top::before {
   content: ""; position: absolute; inset: 0 0 -40px; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(11, 10, 9, .92), rgba(11, 10, 9, .6) 55%, transparent);
@@ -530,7 +530,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .lb__close:hover { background: var(--ivory); color: var(--ink); }
 .lb__stage { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; min-height: 0; }
 .lb__fig { margin: 0; height: 100%; min-height: 0; display: grid; place-items: center; }
-.lb__fig img { max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 14px; }
+.lb__fig img { max-height: calc(100vh - 230px); max-height: calc(100svh - 230px); max-width: 100%; width: auto; object-fit: contain; border-radius: 14px; }
 .lb__nav { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 18px; transition: background .3s, color .3s; }
 .lb__nav:hover { background: var(--ivory); color: var(--ink); }
 .lb__info { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; }
@@ -550,9 +550,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .pill { position: fixed; left: 50%; bottom: 16px; translate: -50% 0; max-width: calc(100vw - 24px); overflow-x: auto; scrollbar-width: none; }
   .pill::-webkit-scrollbar { display: none; }
   .pill a { padding: 9px 13px; font-size: 13px; }
-  .top, .top.is-hidden { transform: none; }
-  .top.is-hidden .brand, .top.is-hidden .tenure-tag { opacity: 0; pointer-events: none; }
-  .brand, .tenure-tag { transition: opacity .4s; }
   .story__grid, .feature-nights, .map__grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(3, 1fr); }
   .stat:nth-child(4) { border-left: 0; }
