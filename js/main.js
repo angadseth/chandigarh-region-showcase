@@ -81,11 +81,12 @@
     const cards = h("div", { class: "day__cards" });
     idxs.forEach((i) => {
       const mt = D.meetups[i];
-      const top = mt.first ? `<span class="badge badge--gold">First ever</span>` : mt.no ? `<span class="badge">Meetup #${mt.no}</span>` : `<span class="badge">${mt.kind}</span>`;
+      const top = mt.first ? `<span class="badge badge--gold">First ever</span>` : `<span class="badge">${mt.kind}</span>`;
       const card = h("button", { class: "mcard", "data-i": i, "data-kind": mt.kind, "data-cursor": "Open", "aria-label": `${mt.city}, ${mt.place}. Open photos` },
         `<div class="mcard__img"><img src="${photo(mt, 1)}" alt="" loading="lazy" decoding="async" width="512" height="640"></div>
-         <div class="mcard__top">${top}<span class="badge">${mt.photos} photos</span></div>
-         <div class="mcard__meta"><div class="mcard__city">${mt.city}</div><div class="mcard__place">${mt.place}</div></div>`);
+         <div class="mcard__top">${top}</div>
+         <div class="mcard__meta"><div><div class="mcard__city">${mt.city}</div><div class="mcard__place">${mt.place}${mt.no ? ` · #${mt.no}` : ""}</div></div>
+         <span class="mcard__count">${dd(mt.photos)}<span class="mcard__arrow">↗</span></span></div>`);
       cards.append(card);
     });
     day.append(cards);
@@ -111,7 +112,7 @@
   $("#spotRail").append(...s2.flatMap(([m, i]) =>
     Array.from({ length: Math.min(2, m.photos) }, (_, k) =>
       h("button", { "data-i": i, "data-p": k + 1, "data-cursor": "View", "aria-label": `${m.city} photos` },
-        `<img src="${photo(m, k + 1)}" alt="" loading="lazy" decoding="async"><span>${m.city}</span>`))));
+        `<img src="${photo(m, k + 1)}" alt="" loading="lazy" decoding="async"><span>${m.city}<small>${m.place.split(",")[0]}</small></span>`))));
 
   /* ---------- Programme / online / videos ---------- */
   $("#programCount").textContent = `${D.sessions.length} sessions`;
@@ -324,6 +325,7 @@
   let lastY = 0;
   const onScroll = (y) => {
     top.classList.toggle("is-hidden", y > innerHeight * .8 && y > lastY);
+    top.classList.toggle("is-scrolled", y > 60);
     lastY = y;
   };
   if (lenis) lenis.on("scroll", ({ scroll }) => onScroll(scroll));
@@ -412,7 +414,8 @@
   gsap.set([".hero__eyebrow", ".hero__sub", ".scroll-cue"], { opacity: 0, y: 16 });
   gsap.set(".stage", { y: 120, opacity: 0 });
   gsap.set(".beams i", { opacity: 0 });
-  gsap.set(".top", { y: -30, opacity: 0 });
+  // header parts fade in on their own; a transform on .top would trap the phone's fixed pill bar
+  gsap.set([".brand", ".pill", ".tenure-tag"], { opacity: 0 });
 
   const intro = () => {
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
@@ -423,7 +426,7 @@
       .to(".hero__eyebrow", { opacity: 1, y: 0, duration: 1.2 }, .5)
       .to(".hero__sub", { opacity: 1, y: 0, duration: 1.2 }, .9)
       .to(".stage", { y: 0, opacity: 1, duration: 1.8 }, .8)
-      .to(".top", { y: 0, opacity: 1, duration: 1.2 }, 1)
+      .to([".brand", ".pill", ".tenure-tag"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
       .to(".scroll-cue", { opacity: 1, y: 0, duration: 1 }, 1.4);
   };
 
