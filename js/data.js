@@ -109,6 +109,16 @@ window.CRS = {
 
   // Add YouTube links here: { title: "Game Night", url: "https://youtu.be/..." }
   videos: [],
+  // the reel: landmarks of the cities the region met in (Wikimedia Commons, credited on the page)
+  monuments: [
+    { slug: "open-hand", name: "Open Hand Monument", city: "Chandigarh", by: "Raakesh Blokhra", license: "CC BY-SA 2.0", src: "https://commons.wikimedia.org/wiki/File:Open_Hand_monument,_Chandigarh.jpg" },
+    { slug: "golden-temple", name: "Harmandir Sahib", city: "Amritsar", by: "Oleg Yunakov", license: "CC BY-SA 3.0", src: "https://commons.wikimedia.org/wiki/File:Hamandir_Sahib_(Golden_Temple).jpg" },
+    { slug: "hawa-mahal", name: "Hawa Mahal", city: "Jaipur", by: "Chainwit.", license: "CC BY-SA 4.0", src: "https://commons.wikimedia.org/wiki/File:East_facade_Hawa_Mahal_Jaipur_from_ground_level_(July_2022)_-_img_01.jpg" },
+    { slug: "lakshman-jhula", name: "Lakshman Jhula", city: "Rishikesh", by: "Snehrashmi", license: "CC BY-SA 4.0", src: "https://commons.wikimedia.org/wiki/File:Lakshman_Jhula_Bridge_-_Hrishikesh_-_Uttarakhand_001.jpg" },
+    { slug: "albert-hall", name: "Albert Hall Museum", city: "Jaipur", by: "chetan", license: "CC BY-SA 3.0", src: "https://commons.wikimedia.org/wiki/File:Albert_Hall_(Museum).JPG" },
+    { slug: "city-palace", name: "City Palace", city: "Udaipur", by: "Hirumon", license: "CC BY 3.0", src: "https://commons.wikimedia.org/wiki/File:City_Palace_Udaipur_Rajasthan_India.JPG" },
+    { slug: "jantar-mantar", name: "Jantar Mantar", city: "Jaipur", by: "Sudipta Maulik", license: "CC BY-SA 4.0", src: "https://commons.wikimedia.org/wiki/File:Doors_of_Jantar_Mantar.jpg" }
+  ],
 
   // Order is the order on the page. photo = transparent cut-out in assets/people/; tint = backdrop colour.
   houses: [

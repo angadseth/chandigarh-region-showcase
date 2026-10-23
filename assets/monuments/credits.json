@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "open-hand",
+    "name": "Open Hand Monument",
+    "city": "Chandigarh",
+    "artist": "Raakesh Blokhra",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Open_Hand_monument,_Chandigarh.jpg"
+  },
+  {
+    "slug": "hawa-mahal",
+    "name": "Hawa Mahal",
+    "city": "Jaipur",
+    "artist": "Chainwit.",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:East_facade_Hawa_Mahal_Jaipur_from_ground_level_(July_2022)_-_img_01.jpg"
+  },
+  {
+    "slug": "golden-temple",
+    "name": "Harmandir Sahib",
+    "city": "Amritsar",
+    "artist": "Oleg Yunakov",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hamandir_Sahib_(Golden_Temple).jpg"
+  },
+  {
+    "slug": "city-palace",
+    "name": "City Palace",
+    "city": "Udaipur",
+    "artist": "Hirumon",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:City_Palace_Udaipur_Rajasthan_India.JPG"
+  },
+  {
+    "slug": "albert-hall",
+    "name": "Albert Hall Museum",
+    "city": "Jaipur",
+    "artist": "chetan",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Albert_Hall_(Museum).JPG"
+  },
+  {
+    "slug": "lakshman-jhula",
+    "name": "Lakshman Jhula",
+    "city": "Rishikesh",
+    "artist": "Snehrashmi",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lakshman_Jhula_Bridge_-_Hrishikesh_-_Uttarakhand_001.jpg"
+  },
+  {
+    "slug": "jantar-mantar",
+    "name": "Jantar Mantar",
+    "city": "Jaipur",
+    "artist": "Sudipta Maulik",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Doors_of_Jantar_Mantar.jpg"
+  }
+]
