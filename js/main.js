@@ -223,7 +223,8 @@
   // The council: every coordinator with a cut-out, in house order, turning like a slow carousel.
   // The one in the middle stands in colour with their name ringed around their head and their
   // house crest floating beside them; the rest wait in black and white on either side.
-  const cast = D.houses.filter((hs) => hs.photo);
+  // an illustration is fine on a house card, but the cover is for real photos
+  const cast = D.houses.filter((hs) => hs.photo && hs.cover !== false);
   const council = $("#council");
   const figs = cast.map((hs, i) => {
     const fig = h("figure", { class: "rc", "data-rc": i, "aria-label": `${hs.rc}, ${hs.name} House` },
@@ -245,13 +246,42 @@
   const motionOK = hasGsap && !reduced;
   let active = 0, geo = null, timer = null, paused = false, started = false;
 
-  // slot for a circular distance d (positive = to the right of centre, so whoever is next waits on the right and walks in)
-  const slot = (d) => {
-    const phone = innerWidth <= 600, a = Math.abs(d), s = Math.sign(d);
-    const xs = phone ? [0, .36, .52] : [0, .25, .385, .48, .56];
-    const sc = phone ? [1, .52, .4] : [1, .7, .57, .48, .42];
-    const max = xs.length - 1, k = Math.min(a, max);
-    return { x: s * xs[k] * geo.W, scale: sc[k], opacity: a >= max ? 0 : a > 1 && a === max - 1 ? .7 : 1, z: 30 - a * 2 };
+  // Whoever is next waits on the right (positive d) and walks in. Two stand on each side; the
+  // rest wait off stage. Neighbours are spaced by the edges of their bodies, not their photos,
+  // so the gaps between people are even and nobody runs into anybody.
+  const arrange = (at) => {
+    const phone = innerWidth <= 600, W = geo.W, room = W / 2 - W * .035;
+    // a narrow screen keeps one person on each side; a wide one keeps two
+    let sc = phone ? [.86, .48] : W < 1000 ? [.9, .58] : [.9, .6, .47];
+    const reach = sc.length - 1;
+    const by = (d) => figs.find((f) => f._L.d === d);
+    const edge = (f, side) => (side > 0 ? f._br : -f._bl) * f._L.scale; // centre to outer body edge
+    const inner = (f, side) => (side > 0 ? -f._bl : f._br) * f._L.scale; // centre to inner body edge
+    for (let tries = 0; tries < 4; tries++) {
+      figs.forEach((f, i) => {
+        const d = dist(i, at), a = Math.abs(d);
+        f._L = { d, scale: sc[Math.min(a, reach)], opacity: a > reach ? 0 : a === 2 ? .8 : 1, z: 30 - a * 2 };
+      });
+      const mid = by(0);
+      mid._L.x = mid._dx * mid._L.scale;
+      let fits = true;
+      [1, -1].forEach((side) => {
+        const row = [];
+        for (let k = 1; k <= reach; k++) { const f = by(side * k); if (f) row.push(f); }
+        // lay them out touching, then share what is left of the half-width as equal gaps;
+        // on a phone the side two just peek in from the edges
+        let span = edge(mid, side) + mid._L.x * side;
+        row.forEach((f) => (span += inner(f, side) + edge(f, side)));
+        const gap = phone ? 8 : Math.min(W * .05, (room - span) / row.length);
+        if (!phone && gap < 12) fits = false;
+        let x = mid._L.x + side * edge(mid, side);
+        row.forEach((f) => { x += side * (Math.max(gap, 12) + inner(f, side)); f._L.x = x; x += side * edge(f, side); });
+      });
+      if (fits) break;
+      sc = sc.map((v) => v * .93); // too wide for this screen: everyone steps back a little
+    }
+    // anyone off stage waits just beyond the edge on the side they will enter from
+    figs.forEach((f) => { if (f._L.x === undefined) f._L.x = Math.sign(f._L.d) * (W / 2 + f._w * f._L.scale * .6); });
   };
   const dist = (i, at = active) => { const n = cast.length; let d = ((i - at) % n + n) % n; if (d > n / 2) d -= n; return d; };
   const measure = () => {
@@ -262,6 +292,25 @@
       const [cx, cy, hr] = hs.head || [.5, .3, .22];
       const w = geo.H * (im.naturalWidth / im.naturalHeight || .8);
       f._w = w; f._head = { x: cx * w, y: cy * geo.H, r: hr * w };
+      // where the visible body starts and ends, read from the cut-out's alpha inside the side feather
+      if (f._bf === undefined) {
+        f._bf = [.2, .8];
+        try {
+          const c = document.createElement("canvas"), ch = 80, cw = Math.max(8, Math.round(ch * im.naturalWidth / im.naturalHeight));
+          c.width = cw; c.height = ch;
+          const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0, cw, ch);
+          const px = g.getImageData(0, 0, cw, Math.round(ch * .64)).data;
+          const on = [];
+          for (let x = 0; x < cw; x++) {
+            const u = x / cw, m = Math.min(1, u / .12, (1 - u) / .12);
+            let hit = false;
+            for (let y = 0; y < Math.round(ch * .64) && !hit; y++) hit = px[(y * cw + x) * 4 + 3] * m > 90;
+            if (hit) on.push(u);
+          }
+          if (on.length) f._bf = [on[0], on[on.length - 1] + 1 / cw];
+        } catch (e) { /* keep the default */ }
+      }
+      f._bl = (f._bf[0] - .5) * w; f._br = (f._bf[1] - .5) * w;
       // keep each face, not each photo, on the centre line
       f._dx = (.5 - cx) * w;
       const nm = $(".rc__name", f);
@@ -269,10 +318,10 @@
       nm.style.top = `${(cy * geo.H - hr * w * 1.55) / geo.H * 100}%`;
     });
   };
-  const place = (f, d, how) => {
-    const s = slot(d), x = s.x + f._dx * s.scale;
+  const place = (f, how) => {
+    const s = f._L, x = s.x;
     f.style.zIndex = s.z;
-    f.classList.toggle("is-near", Math.abs(d) >= 1 && s.opacity > 0);
+    f.classList.toggle("is-near", Math.abs(s.d) >= 1 && s.opacity > 0);
     const to = { x, xPercent: -50, scale: s.scale, opacity: s.opacity, transformOrigin: "50% 100%" };
     if (!motionOK || how === "set") {
       if (hasGsap) gsap.set(f, to);
@@ -331,9 +380,10 @@
     figs[next].classList.add("is-active");
     conceal();
     active = next;
+    arrange(next);
     figs.forEach((f, i) => {
       const d0 = dist(i, prev), d1 = dist(i, next);
-      place(f, d1, Math.abs(d1 - d0) > 1 ? "jump" : "move");
+      place(f, Math.abs(d1 - d0) > 1 ? "jump" : "move");
     });
     if (revealCall) revealCall.kill();
     // the names of the ones waiting come back only once everyone has stopped moving
@@ -354,7 +404,8 @@
   });
   stageReady = Promise.all($$(".rc__img", council).map((im) => (im.complete ? 1 : new Promise((r) => (im.onload = im.onerror = r))))).then(() => {
     measure();
-    figs.forEach((f, i) => place(f, dist(i), "set"));
+    arrange(active);
+    figs.forEach((f) => place(f, "set"));
     figs[active].classList.add("is-active");
     dress();
   });
@@ -362,7 +413,8 @@
   addEventListener("resize", () => {
     if (!geo) return;
     measure();
-    figs.forEach((f, i) => place(f, dist(i), "set"));
+    arrange(active);
+    figs.forEach((f) => place(f, "set"));
     dress();
     declutter();
   });
