@@ -1,7 +1,7 @@
 /* Chandigarh Region Showcase — all content lives here.
    Edit this file to add videos, house photos or new meetups; the page builds itself from it. */
 window.CRS = {
-  tenure: "2024 — 26",
+  tenure: "2026 — 27",
   credit: {
     name: "Angad Jangir", role: "Regional Coordinator · Pichavaram House", org: "IIT Madras", url: "https://angad-jangir.vercel.app",
     links: [
@@ -131,7 +131,7 @@ window.CRS = {
     { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, tint: "#c47a4a" },
     { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", head: [0.491, 0.293, 0.234], tint: "#7b3fe0" },
     { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: "assets/people/corbett.webp", head: [0.535, 0.296, 0.206], tint: "#c39a2e" },
-    { id: "wayanad", name: "Wayanad", rc: "Sagar Rathore", photo: "assets/people/wayanad.webp", head: [0.48, 0.42, 0.3], tint: "#2f95b8" },
+    { id: "wayanad", name: "Wayanad", rc: "Sagar Rathore", photo: "assets/people/wayanad.webp", cover: false, head: [0.48, 0.42, 0.3], tint: "#2f95b8" },
     { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: "assets/people/saranda.webp", head: [0.457, 0.31, 0.2], tint: "#a88a4a" }
   ]
 };
