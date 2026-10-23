@@ -45,10 +45,7 @@
         <circle cx="100" cy="100" r="96" fill="none" stroke="var(--line-2)"/>
         <circle cx="100" cy="100" r="72" fill="none" stroke="var(--gold)" stroke-width="1"/>
         ${dots}
-        <g fill="none" stroke="var(--ivory)" stroke-width="1.3">
-          <rect x="70" y="70" width="60" height="60"/><path d="M90 70v60M110 70v60M70 90h60M70 110h60"/>
-        </g>
-        <rect x="90" y="90" width="20" height="20" fill="var(--gold)"/>
+        <image href="assets/img/logo.webp" x="58" y="58" width="84" height="84"/>
       </svg>`;
   }
 
@@ -282,8 +279,8 @@
       else Object.assign(f.style, { transform: `translateX(-50%) translateX(${x}px) scale(${s.scale})`, opacity: s.opacity });
     } else if (how === "jump") {
       // crossing behind the stage would look wrong: fade out, reappear on the far side
-      gsap.timeline().to(f, { opacity: 0, duration: .4, ease: "power2.in" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: .8, ease: "power2.out" }, "+=.3");
-    } else gsap.to(f, { ...to, duration: 1.4, ease: "expo.inOut" });
+      gsap.timeline().to(f, { opacity: 0, duration: .9, ease: "sine.in" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: 1.3, ease: "sine.out" }, "+=.4");
+    } else gsap.to(f, { ...to, duration: MOVE, ease: "power2.inOut", overwrite: "auto" });
   };
   const dress = () => {
     const hs = cast[active];
@@ -302,22 +299,24 @@
       n.classList.toggle("is-clipped", f.classList.contains("is-near") && r.left < pr.right + 10 && r.right > pr.left - 10 && r.top < pr.bottom + 10 && r.bottom > pr.top - 10);
     });
   };
+  // the name lets go letter by letter, then the next one settles in out of a soft blur
   const reveal = () => {
     dress();
-    motionOK ? gsap.delayedCall(.5, declutter) : declutter();
+    motionOK ? gsap.delayedCall(.8, declutter) : declutter();
     if (!motionOK) { plate.style.opacity = 1; return; }
     gsap.set(plate, { opacity: 1 });
-    gsap.fromTo("#stageRc .ch", { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: .03, ease: "expo.out" });
-    gsap.fromTo([".plate__k", plateLinks], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .9, stagger: .1, ease: "expo.out" });
-    gsap.fromTo(floatCrest, { opacity: 0, y: 40, rotate: -30, scale: .5 }, { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 1.4, ease: "expo.out" });
+    gsap.fromTo("#stageRc .ch", { opacity: 0, yPercent: 45, filter: "blur(10px)" }, { opacity: 1, yPercent: 0, filter: "blur(0px)", duration: 1.5, stagger: .055, ease: "power3.out" });
+    gsap.fromTo([".plate__k", plateLinks], { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 1.2, stagger: .15, ease: "power2.out", delay: .25 });
+    gsap.fromTo(floatCrest, { opacity: 0, y: 34, rotate: -22, scale: .6 }, { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 2, ease: "power3.out" });
   };
   const conceal = () => {
     if (!motionOK) return;
-    gsap.to(floatCrest, { opacity: 0, y: -30, rotate: 25, duration: .35, ease: "power2.in" });
-    gsap.to("#stageRc .ch", { yPercent: -110, duration: .4, stagger: .012, ease: "power2.in" });
-    gsap.to([".plate__k", plateLinks], { opacity: 0, duration: .3 });
+    gsap.to(floatCrest, { opacity: 0, y: -24, rotate: 18, scale: .85, duration: .8, ease: "sine.in" });
+    gsap.to("#stageRc .ch", { opacity: 0, yPercent: -35, filter: "blur(8px)", duration: .7, stagger: .03, ease: "sine.in" });
+    gsap.to([".plate__k", plateLinks], { opacity: 0, y: -8, duration: .6, ease: "sine.in" });
   };
-  const DWELL = 5;
+  const DWELL = 5, MOVE = 2.4;
+  let revealCall = null, settleCall = null;
   const tick = () => {
     if (timer) timer.kill();
     if (!motionOK || cast.length < 2) return;
@@ -336,7 +335,14 @@
       const d0 = dist(i, prev), d1 = dist(i, next);
       place(f, d1, Math.abs(d1 - d0) > 1 ? "jump" : "move");
     });
-    motionOK ? gsap.delayedCall(1.05, reveal) : reveal();
+    if (revealCall) revealCall.kill();
+    // the names of the ones waiting come back only once everyone has stopped moving
+    if (motionOK) {
+      council.classList.add("is-moving");
+      if (settleCall) settleCall.kill();
+      settleCall = gsap.delayedCall(MOVE, () => { declutter(); council.classList.remove("is-moving"); });
+    }
+    motionOK ? (revealCall = gsap.delayedCall(1.15, reveal)) : reveal();
     tick();
   };
   let stageReady;
@@ -378,13 +384,64 @@
   new IntersectionObserver(([en]) => { if (!timer) return; en.isIntersecting && !paused ? timer.resume() : timer.pause(); }).observe(council);
   document.addEventListener("visibilitychange", () => { if (timer) document.hidden ? timer.pause() : !paused && timer.resume(); });
 
-  $("#crests").append(...D.houses.map((hs) => {
+  // houses still waiting on a coordinator photo sit at the end of the row and the grid
+  const byPhoto = D.houses.filter((hs) => hs.photo).concat(D.houses.filter((hs) => !hs.photo));
+  $("#crests").append(...byPhoto.map((hs) => {
     const i = cast.indexOf(hs);
     const a = h("a", { href: "#houses", "data-house": hs.id, title: `${hs.name} House · ${hs.rc}`, "aria-label": `${hs.name} House` }, `<img src="assets/houses/${hs.id}.webp" alt="" width="34" height="34">`);
     if (i >= 0) a.addEventListener("click", (e) => { e.preventDefault(); go(i); });
     return a;
   }));
   $$(".foot__credit").forEach((n) => n.insertAdjacentHTML("beforeend", linkRow("foot__links")));
+
+  /* ---------- Reel: landmarks of the region ---------- */
+  // one photo dissolves into the next while it slowly drifts closer; every one is credited
+  const reelSlides = $("#reelSlides");
+  if (reelSlides && D.monuments && D.monuments.length) {
+    const mons = D.monuments;
+    reelSlides.append(...mons.map((m, i) => h("img", { class: "reel__img" + (i ? "" : " is-on"), src: `assets/monuments/${m.slug}.webp`, alt: `${m.name}, ${m.city}`, loading: i ? "lazy" : "eager", decoding: "async" })));
+    const imgs = $$(".reel__img", reelSlides), bar = $(".reel__progress i");
+    const HOLD = 6.5, FADE = 1.8;
+    let at = 0, loop = null, ken = null, visible = false;
+    const label = () => {
+      const m = mons[at];
+      $("#reelNo").textContent = `${dd(at + 1)} / ${dd(mons.length)}`;
+      $("#reelName").textContent = m.name;
+      $("#reelCity").textContent = m.city;
+      const cr = $("#reelCredit");
+      cr.textContent = `Photo: ${m.by} · ${m.license} · Wikimedia Commons`;
+      cr.href = m.src;
+    };
+    label();
+    if (motionOK) {
+      gsap.set(imgs, { opacity: (i) => (i ? 0 : 1) });
+      const show = (next) => {
+        const prev = imgs[at], im = imgs[next];
+        at = next;
+        if (ken) ken.kill();
+        gsap.set(im, { zIndex: 2 }); gsap.set(prev, { zIndex: 1 });
+        gsap.fromTo(im, { opacity: 0 }, { opacity: 1, duration: FADE, ease: "sine.inOut", onComplete: () => gsap.set(prev, { opacity: 0 }) });
+        ken = gsap.fromTo(im, { scale: 1.12 }, { scale: 1, duration: HOLD + FADE + 1, ease: "none" });
+        gsap.to(".reel__cap > *", { opacity: 0, y: -6, duration: .5, stagger: .05, ease: "sine.in", onComplete: () => {
+          label();
+          gsap.fromTo(".reel__cap > *", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .9, stagger: .08, ease: "power2.out" });
+        } });
+        run();
+      };
+      const run = () => {
+        if (loop) loop.kill();
+        loop = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: HOLD, ease: "none", paused: !visible, onComplete: () => show((at + 1) % mons.length) });
+      };
+      ken = gsap.fromTo(imgs[0], { scale: 1.12 }, { scale: 1, duration: HOLD + FADE + 1, ease: "none", paused: true });
+      run();
+      // only turn while someone can see it
+      new IntersectionObserver(([en]) => {
+        visible = en.isIntersecting && !document.hidden;
+        visible ? (loop.resume(), ken.resume()) : (loop.pause(), ken.pause());
+      }, { threshold: .25 }).observe($("#reelFrame"));
+      document.addEventListener("visibilitychange", () => { if (document.hidden) { loop.pause(); ken.pause(); } else if (visible) { loop.resume(); ken.resume(); } });
+    }
+  }
 
   // Chandigarh's sector plan, drawn behind the masthead; Sector 17, the city centre, is lit
   const plan = $("#plan");
@@ -405,7 +462,7 @@
   /* ---------- Houses ---------- */
   const crest = (hs) => `assets/houses/${hs.id}.webp`;
   const iconLinks = `<div class="house__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener" aria-label="${t}" title="${t}">${ICONS[t] || t}</a>`).join("")}</div>`;
-  $("#housesGrid").append(...D.houses.map((hs) => {
+  $("#housesGrid").append(...byPhoto.map((hs) => {
     const media = hs.photo
       ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
       : `<div class="house__stage house__stage--crest"><img class="house__crest" src="${crest(hs)}" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
@@ -642,7 +699,7 @@
   // Cover starting state: header parts fade in on their own (a transform on .top would trap fixed children)
   gsap.set(".mast__word .ch", { yPercent: 115 });
   gsap.set(".mast__region .ch", { yPercent: 115 });
-  gsap.set([".cover__kicker", ".cover__bar"], { opacity: 0, y: 18 });
+  gsap.set(".cover__bar", { opacity: 0, y: 18 });
   gsap.set(".rc__img", { yPercent: 24, opacity: 0 });
   gsap.set(".cover__plan", { opacity: 0, scale: 1.08 });
   gsap.set([".brand", ".top__right"], { opacity: 0 });
@@ -654,7 +711,6 @@
     tl.to(".cover__plan", { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0)
       .to(".mast__word .ch", { yPercent: 0, duration: 1.5, stagger: .045 }, .1)
       .to(".mast__region .ch", { yPercent: 0, duration: 1.2, stagger: .05 }, .55)
-      .to(".cover__kicker", { opacity: 1, y: 0, duration: 1.2 }, .4)
       .to(rcs.map((f) => $(".rc__img", f)), { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(dist(i)) * .14 }, .6)
       .add(startStage, 1.7)
       .to([".brand", ".top__right"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
@@ -693,7 +749,7 @@
     clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none",
     scrollTrigger: { trigger: "#reel", start: "top 85%", end: "center 55%", scrub: true }
   });
-  gsap.fromTo(".reel__frame img", { yPercent: -12 }, {
+  gsap.fromTo(".reel__slides", { yPercent: -12 }, {
     yPercent: 0, ease: "none", scrollTrigger: { trigger: "#reel", start: "top bottom", end: "bottom top", scrub: true }
   });
 

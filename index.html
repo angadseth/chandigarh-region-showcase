@@ -9,19 +9,19 @@
   <meta property="og:title" content="Chandigarh Region Showcase">
   <meta property="og:description" content="Thirty-two meetups, nineteen cities, ten houses. One region, offline.">
   <meta property="og:image" content="assets/img/hero.webp">
-  <link rel="icon" href="assets/img/emblem.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/img/hero.webp">
-  <link rel="stylesheet" href="css/style.css?v=20261023d">
+  <link rel="stylesheet" href="css/style.css?v=20261023e">
 </head>
 <body>
   <!-- Preloader -->
   <div class="loader" id="loader" aria-hidden="true">
     <div class="loader__inner">
       <svg class="loader__seal" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg>
-      <span class="loader__mono">CR</span>
+      <img class="loader__mark" src="assets/img/logo.webp" alt="" width="84" height="84">
     </div>
     <div class="loader__foot"><span>Chandigarh Region</span><span class="loader__count" id="loaderCount">000</span></div>
   </div>
@@ -32,7 +32,7 @@
   <!-- Header -->
   <header class="top" id="top">
     <a class="brand" href="#hero" aria-label="Chandigarh Region, home">
-      <img src="assets/img/emblem.svg" alt="" width="40" height="40">
+      <img src="assets/img/logo.webp" alt="" width="40" height="40">
       <span class="brand__txt"><b>Chandigarh</b><i>Region · IITM BS</i></span>
     </a>
     <div class="top__right">
@@ -72,7 +72,6 @@
       <svg class="cover__plan" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" id="plan"></svg>
       <div class="cover__glow" aria-hidden="true"></div>
       <div class="cover__head">
-        <p class="cover__kicker"><span>IIT Madras · BS Degree</span><span class="cover__issue">The Region Issue</span><span>Tenure <span data-tenure></span></span></p>
         <h1 class="mast" aria-label="Chandigarh Region"><span class="mast__word" data-split>Chandigarh</span><span class="mast__region" data-split>Region</span></h1>
       </div>
       <div class="council" id="council" aria-label="Regional Coordinators of the Chandigarh Region"></div>
@@ -90,9 +89,11 @@
 
     <!-- The region, together: full-bleed photo that opens up as you scroll -->
     <section class="reel" id="reel">
-      <figure class="reel__frame">
-        <img src="assets/img/hero.webp" alt="Students at the first-ever IITM BS meetup in Sikar, hosted by Pichavaram House" width="1600" height="930" loading="lazy">
-        <figcaption>Sikar Meetup</figcaption>
+      <figure class="reel__frame" id="reelFrame" aria-roledescription="slideshow" aria-label="Landmarks of the region">
+        <div class="reel__slides" id="reelSlides"></div>
+        <figcaption class="reel__cap" aria-live="polite"><i id="reelNo"></i><b id="reelName"></b><em id="reelCity"></em></figcaption>
+        <a class="reel__credit" id="reelCredit" target="_blank" rel="noopener"></a>
+        <span class="reel__progress" aria-hidden="true"><i></i></span>
       </figure>
       <p class="reel__line">One region. Ten houses. <span data-word="cities"></span> cities. Everything we built together, off the screen.</p>
     </section>
@@ -251,7 +252,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="js/data.js?v=20261023d"></script>
-  <script src="js/main.js?v=20261023d"></script>
+  <script src="js/data.js?v=20261023e"></script>
+  <script src="js/main.js?v=20261023e"></script>
 </body>
 </html>
