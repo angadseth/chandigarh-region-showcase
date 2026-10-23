@@ -215,29 +215,181 @@
   });
 
   /* ---------- Cover ---------- */
+  const ICONS = {
+    Portfolio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/></svg>`,
+    LinkedIn: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>`,
+    GitHub: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`
+  };
   const linkRow = (cls) => `<div class="${cls}">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t} ↗</a>`).join("")}</div>`;
   $$("[data-count-inline]").forEach((n) => (n.textContent = counts[n.dataset.countInline]));
 
-  // Coordinators with a cut-out stand in front of the masthead; the lead sits in the middle,
-  // the rest alternate outwards in house order (Kaziranga on the lead's left, then right, ...)
-  const lead = D.houses.find((hs) => hs.featured);
-  const others = D.houses.filter((hs) => hs.photo && !hs.featured);
-  const left = others.filter((_, i) => i % 2 === 0), right = others.filter((_, i) => i % 2 === 1);
-  const lineup = [...left.reverse(), lead, ...right];
+  // The council: every coordinator with a cut-out, in house order, turning like a slow carousel.
+  // The one in the middle stands in colour with their name ringed around their head and their
+  // house crest floating beside them; the rest wait in black and white on either side.
+  const cast = D.houses.filter((hs) => hs.photo);
   const council = $("#council");
-  lineup.forEach((hs) => {
-    const isLead = hs === lead;
-    const dist = isLead ? 0 : Math.min(left.includes(hs) ? left.length - left.indexOf(hs) : right.indexOf(hs) + 1, 4);
-    const fig = h("figure", { class: "rc" + (isLead ? " is-lead" : ""), "data-d": dist, "data-side": isLead ? "c" : left.includes(hs) ? "l" : "r", style: `--h:${[100, 72, 62, 55, 50][dist]}%` },
-      `<img class="rc__img" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House">
-       ${isLead ? "" : `<figcaption class="rc__tag"><b>${hs.rc}</b><span>RC · ${hs.name}</span></figcaption>`}`);
+  const figs = cast.map((hs, i) => {
+    const fig = h("figure", { class: "rc", "data-i": i, "aria-label": `${hs.rc}, ${hs.name} House` },
+      `<img class="rc__img" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House"><span class="rc__name">${hs.rc.split(" ")[0]}</span>`);
     council.append(fig);
+    return fig;
   });
-  // The lead's nameplate answers "Region" on the other side of the masthead
-  $(".mast").insertAdjacentHTML("beforeend",
-    `<span class="mast__lead"><span class="mast__lead-k">Regional Coordinator · ${lead.name}</span><b>${lead.rc}</b>${linkRow("rc__links")}</span>`);
-  $("#crests").append(...D.houses.map((hs) =>
-    h("a", { href: "#houses", title: `${hs.name} House · ${hs.rc}`, "aria-label": `${hs.name} House` }, `<img src="assets/houses/${hs.id}.webp" alt="" width="34" height="34">`)));
+  council.insertAdjacentHTML("beforeend", `
+    <div class="halo" aria-hidden="true"><svg viewBox="0 0 200 200"><defs><path id="haloPath" d="M100,100 m-88,0 a88,88 0 1,1 176,0 a88,88 0 1,1 -176,0"/></defs><text><textPath href="#haloPath" id="haloText"></textPath></text></svg></div>
+    <div class="orbit">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener" aria-label="${t}">${ICONS[t] || ""}<span>${t}</span></a>`).join("")}</div>
+    <img class="float-crest" alt="" aria-hidden="true">
+    <div class="stage-name" aria-live="polite">
+      <button class="stage-name__nav" data-step="-1" aria-label="Previous coordinator">←</button>
+      <div class="stage-name__txt"><span class="stage-name__k"><i id="stageNo"></i><em id="stageHouse"></em></span><b id="stageRc"></b><span class="stage-name__bar"><i></i></span></div>
+      <button class="stage-name__nav" data-step="1" aria-label="Next coordinator">→</button>
+    </div>`);
+  const halo = $(".halo", council), orbit = $(".orbit", council), floatCrest = $(".float-crest", council), stageName = $(".stage-name", council);
+  const motionOK = hasGsap && !reduced;
+  let active = 0, geo = null, timer = null, paused = false, started = false;
+
+  // slot for a circular distance d (positive = to the left of centre, so Kaziranga waits on the lead's left)
+  const slot = (d) => {
+    const phone = innerWidth <= 600, a = Math.abs(d), s = Math.sign(d);
+    const xs = phone ? [0, .36, .52] : [0, .25, .385, .48, .56];
+    const sc = phone ? [1, .52, .4] : [1, .7, .57, .48, .42];
+    const max = xs.length - 1, k = Math.min(a, max);
+    return { x: -s * xs[k] * geo.W, scale: sc[k], opacity: a >= max ? 0 : a > 1 && a === max - 1 ? .7 : 1, z: 30 - a * 2 };
+  };
+  const dist = (i, at = active) => { const n = cast.length; let d = ((i - at) % n + n) % n; if (d > n / 2) d -= n; return d; };
+  const measure = () => {
+    const r = council.getBoundingClientRect();
+    geo = { W: r.width, H: r.height };
+    figs.forEach((f) => {
+      const im = $(".rc__img", f), hs = cast[+f.dataset.i];
+      const [cx, cy, hr] = hs.head || [.5, .3, .22];
+      const w = geo.H * (im.naturalWidth / im.naturalHeight || .8);
+      f._w = w; f._head = { x: cx * w, y: cy * geo.H, r: hr * w };
+      // keep each face, not each photo, on the centre line
+      f._dx = (.5 - cx) * w;
+      const nm = $(".rc__name", f);
+      nm.style.left = `${cx * 100}%`;
+      nm.style.top = `${(cy * geo.H - hr * w * 1.55) / geo.H * 100}%`;
+    });
+  };
+  const place = (f, d, how) => {
+    const s = slot(d), x = s.x + f._dx * s.scale;
+    f.style.zIndex = s.z;
+    f.classList.toggle("is-near", Math.abs(d) >= 1 && s.opacity > 0);
+    const to = { x, xPercent: -50, scale: s.scale, opacity: s.opacity, transformOrigin: "50% 100%" };
+    if (!motionOK || how === "set") {
+      if (hasGsap) gsap.set(f, to);
+      else Object.assign(f.style, { transform: `translateX(-50%) translateX(${x}px) scale(${s.scale})`, opacity: s.opacity });
+    } else if (how === "jump") {
+      // crossing behind the stage would look wrong: fade out, reappear on the far side
+      gsap.timeline().to(f, { opacity: 0, duration: .4, ease: "power2.in" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: .8, ease: "power2.out" }, "+=.3");
+    } else gsap.to(f, { ...to, duration: 1.4, ease: "expo.inOut" });
+  };
+  const dress = () => {
+    const hs = cast[active], f = figs[active], hd = f._head, ring = hd.r * (innerWidth <= 600 ? 1.2 : 1.28);
+    const cx = geo.W / 2, cy = hd.y;
+    Object.assign(halo.style, { left: `${cx}px`, top: `${cy}px`, width: `${ring * 2}px`, height: `${ring * 2}px` });
+    const label = `${hs.rc} ✦ ${hs.name} House ✦ `.toUpperCase();
+    const txt = $("#haloText");
+    txt.textContent = label.repeat(Math.max(1, Math.round(553 / (label.length * 6.2))));
+    txt.setAttribute("textLength", 550);
+    // links orbit the lead's head on the right; the crest pins to the halo on the upper left
+    const at = (deg, rad) => [cx + Math.cos(deg * Math.PI / 180) * rad, cy + Math.sin(deg * Math.PI / 180) * rad];
+    orbit.hidden = !hs.featured;
+    $$("a", orbit).forEach((a, k) => { const [x, y] = at([-42, -4, 34][k], ring + 6); a.style.left = `${x}px`; a.style.top = `${y}px`; });
+    const [fx, fy] = at(218, ring);
+    floatCrest.src = `assets/houses/${hs.id}.webp`;
+    Object.assign(floatCrest.style, { left: `${fx}px`, top: `${fy}px` });
+    $("#stageNo").textContent = `${dd(active + 1)} / ${dd(cast.length)}`;
+    $("#stageHouse").textContent = `${hs.name} House`;
+    const rc = $("#stageRc");
+    rc.innerHTML = [...hs.rc].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
+    $$("#crests a").forEach((a) => a.classList.toggle("is-on", a.dataset.house === hs.id));
+  };
+  const reveal = () => {
+    dress();
+    if (!motionOK) { [halo, orbit, floatCrest, stageName].forEach((n) => (n.style.opacity = 1)); return; }
+    gsap.fromTo(halo, { opacity: 0, scale: .82, rotate: -30 }, { opacity: 1, scale: 1, rotate: 0, duration: 1.4, ease: "expo.out" });
+    gsap.fromTo($$("a", orbit), { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .9, stagger: .09, ease: "back.out(2)", delay: .25 });
+    gsap.set(orbit, { opacity: 1 });
+    gsap.fromTo(floatCrest, { opacity: 0, x: -70, y: 50, rotate: -35, scale: .5 }, { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1, duration: 1.5, ease: "expo.out", delay: .1 });
+    gsap.set(stageName, { opacity: 1 });
+    gsap.fromTo("#stageRc .ch", { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: .03, ease: "expo.out" });
+    gsap.fromTo(".stage-name__k", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .9, ease: "expo.out" });
+  };
+  const conceal = (done) => {
+    if (!motionOK) return done();
+    gsap.to([halo, orbit, floatCrest], { opacity: 0, duration: .35, ease: "power2.in" });
+    gsap.to(floatCrest, { y: -40, rotate: 25, duration: .35, ease: "power2.in" });
+    gsap.to("#stageRc .ch", { yPercent: -110, duration: .4, stagger: .012, ease: "power2.in" });
+    gsap.to(".stage-name__k", { opacity: 0, duration: .3, onComplete: done });
+  };
+  const DWELL = 5;
+  const tick = () => {
+    if (timer) timer.kill();
+    if (!motionOK || cast.length < 2) return;
+    const bar = $(".stage-name__bar i");
+    timer = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: DWELL, ease: "none", paused, onComplete: () => go(active + 1) });
+  };
+  const go = (to) => {
+    const n = cast.length, next = ((to % n) + n) % n;
+    if (next === active && started) return tick();
+    const prev = active;
+    figs[prev].classList.remove("is-active");
+    figs[next].classList.add("is-active");
+    conceal(() => {});
+    active = next;
+    figs.forEach((f, i) => {
+      const d0 = dist(i, prev), d1 = dist(i, next);
+      place(f, d1, Math.abs(d1 - d0) > 1 ? "jump" : "move");
+    });
+    motionOK ? gsap.delayedCall(1.05, reveal) : reveal();
+    tick();
+  };
+  let stageReady;
+  const startStage = () => stageReady.then(() => {
+    started = true;
+    figs[active].classList.add("is-active");
+    reveal();
+    tick();
+  });
+  stageReady = Promise.all($$(".rc__img", council).map((im) => (im.complete ? 1 : new Promise((r) => (im.onload = im.onerror = r))))).then(() => {
+    measure();
+    figs.forEach((f, i) => place(f, dist(i), "set"));
+    figs[active].classList.add("is-active");
+    dress();
+  });
+  if (!motionOK) startStage();
+  addEventListener("resize", () => {
+    if (!geo) return;
+    measure();
+    figs.forEach((f, i) => place(f, dist(i), "set"));
+    dress();
+  });
+  council.addEventListener("click", (e) => {
+    const nav = e.target.closest("[data-step]");
+    if (nav) return go(active + +nav.dataset.step);
+    const f = e.target.closest(".rc");
+    if (f && !f.classList.contains("is-active")) go(+f.dataset.i);
+  });
+  council.addEventListener("pointerenter", () => { paused = true; timer && timer.pause(); });
+  council.addEventListener("pointerleave", () => { paused = false; timer && timer.resume(); });
+  let sx = null;
+  council.addEventListener("touchstart", (e) => (sx = e.touches[0].clientX), { passive: true });
+  council.addEventListener("touchend", (e) => {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) go(active + (dx > 0 ? 1 : -1));
+  });
+  // hold the carousel while the cover is off screen or the tab is hidden
+  new IntersectionObserver(([en]) => { if (!timer) return; en.isIntersecting && !paused ? timer.resume() : timer.pause(); }).observe(council);
+  document.addEventListener("visibilitychange", () => { if (timer) document.hidden ? timer.pause() : !paused && timer.resume(); });
+
+  $("#crests").append(...D.houses.map((hs) => {
+    const i = cast.indexOf(hs);
+    const a = h("a", { href: "#houses", "data-house": hs.id, title: `${hs.name} House · ${hs.rc}`, "aria-label": `${hs.name} House` }, `<img src="assets/houses/${hs.id}.webp" alt="" width="34" height="34">`);
+    if (i >= 0) a.addEventListener("click", (e) => { e.preventDefault(); go(i); });
+    return a;
+  }));
   $$(".foot__credit").forEach((n) => n.insertAdjacentHTML("beforeend", linkRow("foot__links")));
 
   // Chandigarh's sector plan, drawn behind the masthead; Sector 17, the city centre, is lit
@@ -412,7 +564,7 @@
   }
   document.addEventListener("click", (e) => {
     const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
+    if (!a || e.defaultPrevented) return;
     const target = document.querySelector(a.getAttribute("href"));
     if (!target) return;
     e.preventDefault();
@@ -515,31 +667,30 @@
   // Cover starting state: header parts fade in on their own (a transform on .top would trap fixed children)
   gsap.set(".mast__word .ch", { yPercent: 115 });
   gsap.set(".mast__region .ch", { yPercent: 115 });
-  gsap.set([".cover__kicker", ".cover__bar", ".mast__lead"], { opacity: 0, y: 18 });
-  gsap.set(".rc", { yPercent: 28, opacity: 0 });
+  gsap.set([".cover__kicker", ".cover__bar"], { opacity: 0, y: 18 });
+  gsap.set(".rc__img", { yPercent: 24, opacity: 0 });
   gsap.set(".cover__plan", { opacity: 0, scale: 1.08 });
   gsap.set([".brand", ".top__right"], { opacity: 0 });
 
-  // The lead rises first, the rest follow outwards from the middle
-  const rcs = $$(".rc"), leadIdx = Math.max(0, rcs.findIndex((r) => r.classList.contains("is-lead")));
+  // The middle coordinator rises first, the rest follow outwards
+  const rcs = $$(".rc");
   const intro = () => {
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
     tl.to(".cover__plan", { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0)
       .to(".mast__word .ch", { yPercent: 0, duration: 1.5, stagger: .045 }, .1)
       .to(".mast__region .ch", { yPercent: 0, duration: 1.2, stagger: .05 }, .55)
       .to(".cover__kicker", { opacity: 1, y: 0, duration: 1.2 }, .4)
-      .to(".mast__lead", { opacity: 1, y: 0, duration: 1.2 }, 1.1)
-      .to(rcs, { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(i - leadIdx) * .12 }, .6)
+      .to(rcs.map((f) => $(".rc__img", f)), { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(dist(i)) * .14 }, .6)
+      .add(startStage, 1.7)
       .to([".brand", ".top__right"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
       .to(".cover__bar", { opacity: 1, y: 0, duration: 1.1 }, 1.3);
   };
 
   // Loader: count to 100 while the lead portrait and fonts settle
   const countEl = $("#loaderCount");
-  const waitImg = (im) => new Promise((r) => { if (!im || im.complete) return r(); im.onload = im.onerror = r; });
   const ready = Promise.all([
     document.fonts ? document.fonts.ready : Promise.resolve(),
-    waitImg($(".rc.is-lead .rc__img"))
+    stageReady
   ]);
   const prog = { v: 0 };
   gsap.to(".loader__seal circle", { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut" });
