@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8800/"
 OUT = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "research/shots")
 OUT.mkdir(parents=True, exist_ok=True)
-SECTIONS = ["hero", "story", "meetups", "spotlight", "nights", "map", "houses", "gallery"]
+SECTIONS = ["hero", "reel", "story", "meetups", "spotlight", "nights", "map", "houses", "gallery"]
 
 with sync_playwright() as p:
     b = p.chromium.launch()
