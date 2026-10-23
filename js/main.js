@@ -294,8 +294,17 @@
     $("#stageRc").innerHTML = [...hs.rc].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
     $$("#crests a").forEach((a) => a.classList.toggle("is-on", a.dataset.house === hs.id));
   };
+  // a floating name that would run into the nameplate steps aside
+  const declutter = () => {
+    const pr = plate.getBoundingClientRect();
+    figs.forEach((f) => {
+      const n = $(".rc__name", f), r = n.getBoundingClientRect();
+      n.classList.toggle("is-clipped", f.classList.contains("is-near") && r.left < pr.right + 10 && r.right > pr.left - 10 && r.top < pr.bottom + 10 && r.bottom > pr.top - 10);
+    });
+  };
   const reveal = () => {
     dress();
+    motionOK ? gsap.delayedCall(.5, declutter) : declutter();
     if (!motionOK) { plate.style.opacity = 1; return; }
     gsap.set(plate, { opacity: 1 });
     gsap.fromTo("#stageRc .ch", { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: .03, ease: "expo.out" });
@@ -349,6 +358,7 @@
     measure();
     figs.forEach((f, i) => place(f, dist(i), "set"));
     dress();
+    declutter();
   });
   $(".cover__nav").addEventListener("click", (e) => { const nav = e.target.closest("[data-step]"); if (nav) go(active + +nav.dataset.step); });
   council.addEventListener("click", (e) => {
