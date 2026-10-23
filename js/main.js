@@ -229,7 +229,7 @@
   const cast = D.houses.filter((hs) => hs.photo);
   const council = $("#council");
   const figs = cast.map((hs, i) => {
-    const fig = h("figure", { class: "rc", "data-i": i, "aria-label": `${hs.rc}, ${hs.name} House` },
+    const fig = h("figure", { class: "rc", "data-rc": i, "aria-label": `${hs.rc}, ${hs.name} House` },
       `<img class="rc__img" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House"><span class="rc__name">${hs.rc.split(" ")[0]}</span>`);
     council.append(fig);
     return fig;
@@ -266,7 +266,7 @@
     const r = council.getBoundingClientRect();
     geo = { W: r.width, H: r.height };
     figs.forEach((f) => {
-      const im = $(".rc__img", f), hs = cast[+f.dataset.i];
+      const im = $(".rc__img", f), hs = cast[+f.dataset.rc];
       const [cx, cy, hr] = hs.head || [.5, .3, .22];
       const w = geo.H * (im.naturalWidth / im.naturalHeight || .8);
       f._w = w; f._head = { x: cx * w, y: cy * geo.H, r: hr * w };
@@ -358,7 +358,7 @@
   plate.addEventListener("click", (e) => { const nav = e.target.closest("[data-step]"); if (nav) go(active + +nav.dataset.step); });
   council.addEventListener("click", (e) => {
     const f = e.target.closest(".rc");
-    if (f && !f.classList.contains("is-active")) go(+f.dataset.i);
+    if (f && !f.classList.contains("is-active")) go(+f.dataset.rc);
   });
   council.addEventListener("pointerenter", () => { paused = true; timer && timer.pause(); });
   council.addEventListener("pointerleave", () => { paused = false; timer && timer.resume(); });
@@ -399,32 +399,13 @@
 
   /* ---------- Houses ---------- */
   const crest = (hs) => `assets/houses/${hs.id}.webp`;
-  const feat = D.houses.find((hs) => hs.featured);
-  if (feat) {
-    const hostedHere = D.meetups.filter((m) => m.host === feat.name).length;
-    $("#houseFeature").append(h("article", { class: "hfeat", style: `--tint:${feat.tint}` },
-      `<div class="hfeat__copy">
-         <p class="eyebrow"><span class="hfeat__dot"></span>${feat.name} House · Regional Coordinator</p>
-         <h3 class="hfeat__name">${feat.rc.split(" ").join("<br>")}</h3>
-         <p class="hfeat__line">${feat.line || ""}</p>
-         ${linkRow("hfeat__links")}
-         <div class="hfeat__meta">
-           <img src="${crest(feat)}" alt="${feat.name} House crest" width="88" height="88">
-           <dl><div><dt>House</dt><dd>${feat.name}</dd></div><div><dt>Meetups hosted</dt><dd>${dd(hostedHere)}</dd></div><div><dt>Region</dt><dd>Chandigarh</dd></div></dl>
-         </div>
-       </div>
-       <div class="hfeat__art">
-         <img class="hfeat__crest" src="${crest(feat)}" alt="" aria-hidden="true">
-         <img class="hfeat__person" src="${feat.photo}" alt="${feat.rc}, Regional Coordinator of ${feat.name} House" width="825" height="1100">
-         <span class="hfeat__tag">RC · ${feat.name}</span>
-       </div>`));
-  }
-  $("#housesGrid").append(...D.houses.filter((hs) => !hs.featured).map((hs) => {
+  const iconLinks = `<div class="house__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener" aria-label="${t}" title="${t}">${ICONS[t] || t}</a>`).join("")}</div>`;
+  $("#housesGrid").append(...D.houses.map((hs) => {
     const media = hs.photo
       ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
       : `<div class="house__stage house__stage--crest"><img class="house__crest" src="${crest(hs)}" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
-    return h("article", { class: "house" + (hs.photo ? " has-photo" : ""), style: `--tint:${hs.tint || "#d6b36f"}` },
-      `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div></div>`);
+    return h("article", { class: "house" + (hs.photo ? " has-photo" : "") + (hs.featured ? " is-first" : ""), style: `--tint:${hs.tint || "#d6b36f"}` },
+      `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div>${hs.featured ? iconLinks : ""}</div>`);
   }));
 
   /* ---------- The Wall ---------- */
@@ -739,11 +720,11 @@
   });
 
   // Cards: unmask from below
-  ScrollTrigger.batch(".mcard, .house, .hfeat, .otile, .prow, .night, .map__list li", {
+  ScrollTrigger.batch(".mcard, .house, .otile, .prow, .night, .map__list li", {
     start: "top 92%",
     onEnter: (els) => gsap.fromTo(els, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, stagger: .06, ease: "expo.out", overwrite: true })
   });
-  gsap.set(".mcard, .house, .hfeat, .otile, .prow, .night, .map__list li", { opacity: 0 });
+  gsap.set(".mcard, .house, .otile, .prow, .night, .map__list li", { opacity: 0 });
 
   // Spotlight rail drifts sideways as the section passes
   const spotRail = $("#spotRail");
