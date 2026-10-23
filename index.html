@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Chandigarh Region Showcase</title>
-  <meta name="description" content="Twenty-five meetups, fifteen cities, ten houses. What the Chandigarh Region of the IIT Madras BS Degree did this tenure.">
+  <meta name="description" content="Thirty-two meetups, nineteen cities, ten houses. What the Chandigarh Region of the IIT Madras BS Degree did this tenure.">
   <meta name="theme-color" content="#0b0a09">
   <meta property="og:title" content="Chandigarh Region Showcase">
-  <meta property="og:description" content="Twenty-five meetups, fifteen cities, ten houses. One region, offline.">
+  <meta property="og:description" content="Thirty-two meetups, nineteen cities, ten houses. One region, offline.">
   <meta property="og:image" content="assets/img/hero.webp">
   <link rel="icon" href="assets/img/emblem.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,37 +35,61 @@
       <img src="assets/img/emblem.svg" alt="" width="40" height="40">
       <span class="brand__txt"><b>Chandigarh</b><i>Region · IITM BS</i></span>
     </a>
-    <nav class="pill" aria-label="Sections">
-      <span class="pill__glide" aria-hidden="true"></span>
-      <a href="#story" data-sec="story">Overview</a>
-      <a href="#meetups" data-sec="meetups">Meetups</a>
-      <a href="#nights" data-sec="nights">Nights</a>
-      <a href="#map" data-sec="map">Map</a>
-      <a href="#houses" data-sec="houses">Houses</a>
-      <a href="#gallery" data-sec="gallery">Gallery</a>
-    </nav>
-    <span class="tenure-tag">Tenure <b data-tenure></b></span>
+    <div class="top__right">
+      <span class="tenure-tag">Tenure <b data-tenure></b></span>
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu"><span class="menu-btn__lines" aria-hidden="true"><i></i><i></i></span><span class="menu-btn__txt">Index</span></button>
+    </div>
   </header>
 
+  <!-- Full-screen index -->
+  <nav class="menu" id="menu" aria-label="Sections" hidden>
+    <ol class="menu__list">
+      <li><a href="#council" data-sec="council"><span>00</span>The Council</a></li>
+      <li><a href="#story" data-sec="story"><span>01</span>The Tenure</a></li>
+      <li><a href="#meetups" data-sec="meetups"><span>02</span>Meetups</a></li>
+      <li><a href="#nights" data-sec="nights"><span>03</span>Nights &amp; Sessions</a></li>
+      <li><a href="#map" data-sec="map"><span>04</span>The Map</a></li>
+      <li><a href="#houses" data-sec="houses"><span>05</span>Houses</a></li>
+      <li><a href="#gallery" data-sec="gallery"><span>06</span>The Wall</a></li>
+    </ol>
+    <div class="menu__foot"><span>Chandigarh Region · IIT Madras BS Degree</span><span>Tenure <span data-tenure></span></span></div>
+  </nav>
+
+  <!-- Section rail (desktop) -->
+  <aside class="rail" aria-hidden="true">
+    <a href="#hero" data-sec="hero"><i></i><span>Cover</span></a>
+    <a href="#story" data-sec="story"><i></i><span>Tenure</span></a>
+    <a href="#meetups" data-sec="meetups"><i></i><span>Meetups</span></a>
+    <a href="#nights" data-sec="nights"><i></i><span>Nights</span></a>
+    <a href="#map" data-sec="map"><i></i><span>Map</span></a>
+    <a href="#houses" data-sec="houses"><i></i><span>Houses</span></a>
+    <a href="#gallery" data-sec="gallery"><i></i><span>Wall</span></a>
+  </aside>
+
   <main>
-    <!-- Hero -->
-    <section class="hero" id="hero">
-      <div class="beams" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="hero__copy">
-        <p class="eyebrow hero__eyebrow"><span>IIT Madras · BS Degree</span><span class="dot"></span><span>Tenure <span data-tenure></span></span></p>
-        <h1 class="wordmark" aria-label="Chandigarh Region">
-          <span class="wordmark__big" data-split>Chandigarh</span>
-          <span class="wordmark__small"><span class="rule"></span><span data-split>Region</span><span class="rule"></span></span>
-        </h1>
-        <p class="hero__sub">One region. Ten houses. Fifteen cities.<br>Everything we built together, off the screen.</p>
+    <!-- Cover: a magazine masthead with the region's coordinators standing in front of it -->
+    <section class="cover" id="hero">
+      <svg class="cover__plan" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" id="plan"></svg>
+      <div class="cover__glow" aria-hidden="true"></div>
+      <div class="cover__head">
+        <p class="cover__kicker"><span>IIT Madras · BS Degree</span><span class="cover__issue">The Region Issue</span><span>Tenure <span data-tenure></span></span></p>
+        <h1 class="mast" aria-label="Chandigarh Region"><span class="mast__word" data-split>Chandigarh</span><span class="mast__region" data-split>Region</span></h1>
       </div>
-      <div class="stage" id="stage">
-        <figure class="stage__frame">
-          <img src="assets/img/hero.webp" alt="Students of the Chandigarh Region together on the steps of Nahargarh Fort, Jaipur" width="930" height="540">
-          <figcaption><span>Nahargarh Fort, Jaipur</span><span>23 · 08 · 2026</span></figcaption>
-        </figure>
+      <div class="council" id="council" aria-label="Regional Coordinators of the Chandigarh Region"></div>
+      <div class="cover__bar">
+        <p class="cover__lines"><b data-count-inline="meetups"></b> meetups <i>/</i> <b data-count-inline="cities"></b> cities <i>/</i> <b>10</b> houses</p>
+        <div class="crests" id="crests"></div>
+        <a class="cover__scroll" href="#reel">Scroll <span aria-hidden="true">↓</span></a>
       </div>
-      <a class="scroll-cue" href="#story" aria-label="Scroll to overview"><span></span></a>
+    </section>
+
+    <!-- The region, together: full-bleed photo that opens up as you scroll -->
+    <section class="reel" id="reel">
+      <figure class="reel__frame">
+        <img src="assets/img/hero.webp" alt="Students at the first-ever IITM BS meetup in Sikar, hosted by Pichavaram House" width="1600" height="930" loading="lazy">
+        <figcaption><span>Sikar · the first-ever meetup · Pichavaram House</span><span>04 · 10 · 2026</span></figcaption>
+      </figure>
+      <p class="reel__line">One region. Ten houses. <span data-word="cities"></span> cities. Everything we built together, off the screen.</p>
     </section>
 
     <!-- Overview -->
@@ -74,6 +98,10 @@
         <article class="card story__lead">
           <p class="eyebrow">The Tenure</p>
           <p class="statement" data-words>This was the term the region stopped being a WhatsApp group. Students who knew each other only as names in a chat met at forts, cafés and exam centres, from Jammu down to Indore, and found a campus they never had.</p>
+          <a class="byline" href="#houses">
+            <span class="byline__pic"><img src="assets/people/angad.webp" alt="" width="64" height="64"></span>
+            <span class="byline__txt"><span class="eyebrow">Curated by</span><b data-credit-name></b><i data-credit-role></i></span>
+          </a>
         </article>
         <aside class="card story__seal">
           <p class="eyebrow">Emblem</p>
@@ -88,7 +116,7 @@
       <header class="sec-head">
         <p class="eyebrow">01 — Offline</p>
         <h2 class="sec-title" data-reveal>The Meetups</h2>
-        <p class="sec-lede">Every Sunday became a chance to meet. Twenty-five meetups across the region, each one photographed, each one a little different.</p>
+        <p class="sec-lede">Every Sunday became a chance to meet. <span data-word="meetups"></span> meetups across the region, each one a little different.</p>
       </header>
       <div class="chips" id="chips" role="tablist" aria-label="Filter meetups"></div>
       <div class="timeline" id="timeline"></div>
@@ -153,7 +181,7 @@
     <section class="map wrap" id="map">
       <header class="sec-head">
         <p class="eyebrow">03 — The Region</p>
-        <h2 class="sec-title" data-reveal>Fifteen cities,<br><em>one map</em></h2>
+        <h2 class="sec-title" data-reveal><span data-word="cities"></span> cities,<br><em>one map</em></h2>
       </header>
       <div class="map__grid">
         <div class="map__canvas card"><svg id="mapSvg" viewBox="0 0 600 640" role="img" aria-label="Map of meetup cities in the Chandigarh Region"></svg></div>
@@ -168,6 +196,7 @@
         <h2 class="sec-title" data-reveal>Ten houses.<br><em>One region.</em></h2>
         <p class="sec-lede">Every meetup on this page was a collaboration. These are the houses of the Chandigarh Region and the coordinators who carried them.</p>
       </header>
+      <div id="houseFeature"></div>
       <div class="houses__grid" id="housesGrid"></div>
     </section>
 
@@ -187,6 +216,7 @@
       <div class="foot__credit">
         <p class="eyebrow">Designed &amp; built by</p>
         <p class="foot__name"><a data-credit-link><span data-credit-name></span></a></p>
+        <p class="foot__role" data-credit-role></p>
         <p class="foot__org" data-credit-org></p>
       </div>
       <div class="foot__meta">

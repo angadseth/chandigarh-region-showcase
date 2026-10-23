@@ -16,7 +16,10 @@
   const parse = (iso) => { const [y, m, d] = iso.split("-").map(Number); return { y, m, d }; };
   const dd = (n) => String(n).padStart(2, "0");
   const dayName = (iso) => ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date(iso + "T12:00:00").getDay()];
-  const photo = (m, i, small = true) => `assets/meetups/${m.ig}-${i}${small ? "-s" : ""}.webp`;
+  const photo = (m, i, small = true) => `assets/meetups/${m.file || m.ig}-${i}${small ? "-s" : ""}.webp`;
+  const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+  const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  const word = (n) => { const w = n < 20 ? WORDS[n] : TENS[Math.floor(n / 10)] + (n % 10 ? "-" + WORDS[n % 10] : ""); return w[0].toUpperCase() + w.slice(1); };
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasGsap = !!window.gsap && !!window.ScrollTrigger;
   if (reduced || !hasGsap) document.documentElement.classList.add("reduced");
@@ -25,6 +28,7 @@
   $$("[data-tenure]").forEach((n) => (n.textContent = D.tenure));
   $$("[data-credit-name]").forEach((n) => (n.textContent = D.credit.name));
   $$("[data-credit-org]").forEach((n) => (n.textContent = D.credit.org));
+  $$("[data-credit-role]").forEach((n) => (n.textContent = D.credit.role));
   $$("[data-credit-link]").forEach((n) => { n.href = D.credit.url; n.target = "_blank"; n.rel = "noopener"; });
 
   /* ---------- Seal ---------- */
@@ -51,6 +55,8 @@
   /* ---------- Stats ---------- */
   const cityCount = {};
   D.meetups.forEach((m) => (cityCount[m.city] = (cityCount[m.city] || 0) + 1));
+  const counts = { meetups: D.meetups.length, cities: Object.keys(cityCount).length };
+  $$("[data-word]").forEach((n) => (n.textContent = word(counts[n.dataset.word])));
   const stats = [
     [D.meetups.length, "Offline meetups"],
     [Object.keys(cityCount).length, "Cities"],
@@ -82,6 +88,12 @@
     idxs.forEach((i) => {
       const mt = D.meetups[i];
       const top = mt.first ? `<span class="badge badge--gold">First ever</span>` : `<span class="badge">${mt.kind}</span>`;
+      if (!mt.photos) {
+        cards.append(h("div", { class: "mcard mcard--soon", "data-kind": mt.kind },
+          `<div class="mcard__img"><div class="soon"><span class="soon__no">#${mt.no}</span><span class="soon__city">${mt.city}</span><span class="soon__txt">Photos on their way</span></div></div>
+           <div class="mcard__meta"><div><div class="mcard__city">${mt.city}</div><div class="mcard__place">Student meetup${mt.no ? ` · #${mt.no}` : ""}</div></div></div>`));
+        return;
+      }
       const card = h("button", { class: "mcard", "data-i": i, "data-kind": mt.kind, "data-cursor": "Open", "aria-label": `${mt.city}, ${mt.place}. Open photos` },
         `<div class="mcard__img"><img src="${photo(mt, 1)}" alt="" loading="lazy" decoding="async" width="512" height="640"></div>
          <div class="mcard__top">${top}</div>
@@ -145,7 +157,9 @@
   const svg = $("#mapSvg");
   const NS = "http://www.w3.org/2000/svg";
   const P = ([lat, lon]) => [97 + (lon - 72.5) * 42.7, 40 + (33.4 - lat) * 48];
-  const labelSide = { Sirsa: "l", Bhilwara: "l", Udaipur: "l", Amritsar: "l", Hisar: "b", Indore: "l" };
+  const labelSide = { Sirsa: "l", Bhilwara: "l", Udaipur: "l", Amritsar: "l", Hisar: "b", Indore: "l", Sikar: "l", Chandigarh: "l", Haldwani: "r" };
+  // the Uttarakhand cluster is too tight to label in place: stack its names to the right with leader lines
+  const stacked = { Dehradun: 140, Rishikesh: 166, Haridwar: 192, Roorkee: 218 };
   let mapMarkup = "";
   for (let lat = 22; lat <= 33; lat += 2) {
     const y = P([lat, 0])[1];
@@ -167,13 +181,18 @@
     const [x, y] = P(D.cities[c]);
     const n = cityCount[c] || 0;
     const side = labelSide[c] || "r";
-    const tx = side === "l" ? x - 12 : side === "b" ? x : x + 12;
-    const ty = side === "b" ? y + 22 : y + 4;
+    let tx = side === "l" ? x - 12 : side === "b" ? x : x + 12;
+    let ty = side === "b" ? y + 22 : y + 4;
     const anchor = side === "l" ? "end" : side === "b" ? "middle" : "start";
+    let leader = "";
+    if (stacked[c]) {
+      tx = 430; ty = stacked[c];
+      leader = `<path class="leader" d="M${x + 4},${y} L${404},${ty - 4} L${424},${ty - 4}"/>`;
+    }
     mapMarkup += `<g class="node${c === "Chandigarh" ? " is-hub" : ""}" data-city="${c}">
       ${c === "Chandigarh" ? `<circle class="pulse" cx="${x}" cy="${y}" r="10"/>` : ""}
       <circle class="halo" cx="${x}" cy="${y}" r="${5 + n * 2.6}"/>
-      <circle class="core" cx="${x}" cy="${y}" r="3.2"/>
+      ${leader}<circle class="core" cx="${x}" cy="${y}" r="3.2"/>
       <text x="${tx}" y="${ty}" text-anchor="${anchor}">${c}</text></g>`;
   });
   svg.innerHTML = mapMarkup;
@@ -195,19 +214,91 @@
     root.addEventListener("mouseout", (e) => { const t = e.target.closest("[data-city]"); if (t) lightCity(t.dataset.city, false); });
   });
 
+  /* ---------- Cover ---------- */
+  const linkRow = (cls) => `<div class="${cls}">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t} ↗</a>`).join("")}</div>`;
+  $$("[data-count-inline]").forEach((n) => (n.textContent = counts[n.dataset.countInline]));
+
+  // Coordinators with a cut-out stand in front of the masthead; the lead sits in the middle,
+  // the rest alternate outwards in house order (Kaziranga on the lead's left, then right, ...)
+  const lead = D.houses.find((hs) => hs.featured);
+  const others = D.houses.filter((hs) => hs.photo && !hs.featured);
+  const left = others.filter((_, i) => i % 2 === 0), right = others.filter((_, i) => i % 2 === 1);
+  const lineup = [...left.reverse(), lead, ...right];
+  const council = $("#council");
+  lineup.forEach((hs) => {
+    const isLead = hs === lead;
+    const dist = isLead ? 0 : Math.min(left.includes(hs) ? left.length - left.indexOf(hs) : right.indexOf(hs) + 1, 4);
+    const fig = h("figure", { class: "rc" + (isLead ? " is-lead" : ""), "data-d": dist, "data-side": isLead ? "c" : left.includes(hs) ? "l" : "r", style: `--h:${[100, 72, 62, 55, 50][dist]}%` },
+      `<img class="rc__img" src="${hs.photo}" alt="${hs.rc}, Regional Coordinator, ${hs.name} House">
+       ${isLead ? "" : `<figcaption class="rc__tag"><b>${hs.rc}</b><span>RC · ${hs.name}</span></figcaption>`}`);
+    council.append(fig);
+  });
+  // The lead's nameplate answers "Region" on the other side of the masthead
+  $(".mast").insertAdjacentHTML("beforeend",
+    `<span class="mast__lead"><span class="mast__lead-k">Regional Coordinator · ${lead.name}</span><b>${lead.rc}</b>${linkRow("rc__links")}</span>`);
+  $("#crests").append(...D.houses.map((hs) =>
+    h("a", { href: "#houses", title: `${hs.name} House · ${hs.rc}`, "aria-label": `${hs.name} House` }, `<img src="assets/houses/${hs.id}.webp" alt="" width="34" height="34">`)));
+  $$(".foot__credit").forEach((n) => n.insertAdjacentHTML("beforeend", linkRow("foot__links")));
+
+  // Chandigarh's sector plan, drawn behind the masthead; Sector 17, the city centre, is lit
+  const plan = $("#plan");
+  if (plan) {
+    let g = `<g transform="rotate(-9 800 450)">`;
+    const cw = 210, ch = 150;
+    for (let x = -420; x <= 2000; x += cw) g += `<path class="road${x === 800 ? " road--main" : ""}" d="M${x} -400 V1300"/>`;
+    for (let y = -300; y <= 1200; y += ch) g += `<path class="road${y === 450 ? " road--main" : ""}" d="M-500 ${y} H2100"/>`;
+    let n = 1;
+    for (let y = -300; y < 1200; y += ch) for (let x = -420; x < 2000; x += cw) {
+      if (x === 800 && y === 150) g += `<rect class="sector" x="${x + 10}" y="${y + 10}" width="${cw - 20}" height="${ch - 20}"/><text x="${x + 18}" y="${y + 28}" style="fill:rgba(214,179,111,.7)">SECTOR 17</text>`;
+      else if ((x + y) % 3 === 0) g += `<text x="${x + 14}" y="${y + 24}">${String(n).padStart(2, "0")}</text>`;
+      n++;
+    }
+    plan.innerHTML = g + "</g>";
+  }
+
   /* ---------- Houses ---------- */
-  $("#housesGrid").append(...D.houses.map((hs) => {
+  const crest = (hs) => `assets/houses/${hs.id}.webp`;
+  const feat = D.houses.find((hs) => hs.featured);
+  if (feat) {
+    const hostedHere = D.meetups.filter((m) => m.host === feat.name).length;
+    $("#houseFeature").append(h("article", { class: "hfeat", style: `--tint:${feat.tint}` },
+      `<div class="hfeat__copy">
+         <p class="eyebrow"><span class="hfeat__dot"></span>${feat.name} House · Regional Coordinator</p>
+         <h3 class="hfeat__name">${feat.rc.split(" ").join("<br>")}</h3>
+         <p class="hfeat__line">${feat.line || ""}</p>
+         ${linkRow("hfeat__links")}
+         <div class="hfeat__meta">
+           <img src="${crest(feat)}" alt="${feat.name} House crest" width="88" height="88">
+           <dl><div><dt>House</dt><dd>${feat.name}</dd></div><div><dt>Meetups hosted</dt><dd>${dd(hostedHere)}</dd></div><div><dt>Region</dt><dd>Chandigarh</dd></div></dl>
+         </div>
+       </div>
+       <div class="hfeat__art">
+         <img class="hfeat__crest" src="${crest(feat)}" alt="" aria-hidden="true">
+         <img class="hfeat__person" src="${feat.photo}" alt="${feat.rc}, Regional Coordinator of ${feat.name} House" width="825" height="1100">
+         <span class="hfeat__tag">RC · ${feat.name}</span>
+       </div>`));
+  }
+  $("#housesGrid").append(...D.houses.filter((hs) => !hs.featured).map((hs) => {
     const media = hs.photo
-      ? `<div class="house__photo"><img src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="assets/houses/${hs.id}.webp" alt=""></div>`
-      : `<div class="house__logo"><img src="assets/houses/${hs.id}.webp" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
-    return h("article", { class: "house" },
-      `${media}<div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div>`);
+      ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
+      : `<div class="house__stage house__stage--crest"><img class="house__crest" src="${crest(hs)}" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
+    return h("article", { class: "house" + (hs.photo ? " has-photo" : ""), style: `--tint:${hs.tint || "#d6b36f"}` },
+      `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div></div>`);
   }));
 
   /* ---------- Gallery marquee ---------- */
   const all = D.meetups.flatMap((m, i) => Array.from({ length: m.photos }, (_, k) => [i, k + 1]));
-  const shuffled = all.map((x, i) => [x, (i * 7919) % all.length]).sort((a, b) => a[1] - b[1]).map((x) => x[0]);
-  const half = Math.ceil(shuffled.length / 2);
+  const ours = all.filter(([i]) => D.meetups[i].host === "Pichavaram");
+  const rest = all.filter(([i]) => D.meetups[i].host !== "Pichavaram");
+  const mixed = rest.map((x, i) => [x, (i * 7919) % rest.length]).sort((a, b) => a[1] - b[1]).map((x) => x[0]);
+  // Pichavaram's photos open both rows, alternating
+  const shuffled = [];
+  const half0 = Math.ceil(all.length / 2);
+  const rowA = [], rowB = [];
+  ours.forEach((x, k) => (k % 2 ? rowB : rowA).push(x));
+  mixed.forEach((x) => (rowA.length < half0 ? rowA : rowB).push(x));
+  shuffled.push(...rowA, ...rowB);
+  const half = rowA.length;
   const marquee = $("#marquee");
   [shuffled.slice(0, half), shuffled.slice(half)].forEach((set, r) => {
     const row = h("div", { class: "mq-row", "data-dir": r ? "1" : "-1" });
@@ -229,7 +320,8 @@
     $("#lbTitle").textContent = `${m.city} — ${m.place}`;
     $("#lbNote").textContent = m.note;
     $("#lbCount").textContent = `${dd(cur.p)} / ${dd(m.photos)}`;
-    $("#lbIg").href = `https://www.instagram.com/p/${m.ig}/`;
+    $("#lbIg").hidden = !m.ig;
+    if (m.ig) $("#lbIg").href = `https://www.instagram.com/p/${m.ig}/`;
     if (hasGsap && !reduced) gsap.fromTo(lbImg, { opacity: 0, scale: .98 }, { opacity: 1, scale: 1, duration: .5, ease: "expo.out" });
   };
   const lbOpen = (i, p = 1) => {
@@ -248,10 +340,16 @@
     lastFocus && lastFocus.focus();
   };
   const step = (dir) => {
-    const m = D.meetups[cur.i];
+    const N = D.meetups.length;
     cur.p += dir;
-    if (cur.p > m.photos) { cur.i = (cur.i + 1) % D.meetups.length; cur.p = 1; }
-    if (cur.p < 1) { cur.i = (cur.i - 1 + D.meetups.length) % D.meetups.length; cur.p = D.meetups[cur.i].photos; }
+    if (cur.p > D.meetups[cur.i].photos) {
+      do cur.i = (cur.i + 1) % N; while (!D.meetups[cur.i].photos);
+      cur.p = 1;
+    }
+    if (cur.p < 1) {
+      do cur.i = (cur.i - 1 + N) % N; while (!D.meetups[cur.i].photos);
+      cur.p = D.meetups[cur.i].photos;
+    }
     lbShow();
   };
   document.addEventListener("click", (e) => {
@@ -277,25 +375,27 @@
     tx0 = null;
   });
 
-  /* ---------- Pill nav ---------- */
-  const pill = $(".pill"), glide = $(".pill__glide");
-  const links = $$("a[data-sec]", pill);
-  const setActive = (id) => {
-    links.forEach((a) => a.classList.toggle("is-active", a.dataset.sec === id));
-    const a = links.find((l) => l.dataset.sec === id);
-    if (!a) { glide.style.opacity = 0; return; }
-    glide.style.opacity = 1;
-    glide.style.width = a.offsetWidth + "px";
-    glide.style.transform = `translateX(${a.offsetLeft}px)`;
-    if (pill.scrollWidth > pill.clientWidth) pill.scrollTo({ left: a.offsetLeft - 40, behavior: "smooth" });
+  /* ---------- Index menu + section rail ---------- */
+  const menuBtn = $("#menuBtn"), menu = $("#menu");
+  const setMenu = (open) => {
+    document.documentElement.classList.toggle("menu-open", open);
+    menuBtn.setAttribute("aria-expanded", open);
+    menuBtn.querySelector(".menu-btn__txt").textContent = open ? "Close" : "Index";
+    menu.hidden = false;
+    if (open) { lenis && lenis.stop(); } else { lenis && lenis.start(); }
   };
-  const secMap = { story: "story", meetups: "meetups", spotlight: "meetups", nights: "nights", map: "map", houses: "houses", gallery: "gallery" };
+  menuBtn.addEventListener("click", () => setMenu(!document.documentElement.classList.contains("menu-open")));
+  menu.addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.documentElement.classList.contains("menu-open")) setMenu(false); });
+
+  const rail = $(".rail");
+  const railLinks = $$("a[data-sec]", rail);
+  const setActive = (id) => railLinks.forEach((a) => a.classList.toggle("is-active", a.dataset.sec === id));
+  const secMap = { hero: "hero", reel: "hero", story: "story", meetups: "meetups", spotlight: "meetups", nights: "nights", map: "map", houses: "houses", gallery: "gallery" };
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) setActive(secMap[en.target.id]); });
   }, { rootMargin: "-45% 0px -50% 0px" });
   Object.keys(secMap).forEach((id) => { const s = document.getElementById(id); s && io.observe(s); });
-  new IntersectionObserver(([en]) => { if (en.isIntersecting) setActive(null); }, { rootMargin: "0px 0px -60% 0px" }).observe($("#hero"));
-  addEventListener("resize", () => { const a = $("a.is-active", pill); a && setActive(a.dataset.sec); });
 
   /* ---------- Smooth scroll ---------- */
   let lenis = null;
@@ -326,6 +426,7 @@
   const onScroll = (y) => {
     top.classList.toggle("is-hidden", y > innerHeight * .8 && y > lastY);
     top.classList.toggle("is-scrolled", y > 60);
+    rail.classList.toggle("is-on", y > innerHeight * .6);
     lastY = y;
   };
   if (lenis) lenis.on("scroll", ({ scroll }) => onScroll(scroll));
@@ -407,34 +508,34 @@
   document.body.classList.add("is-loading");
   lenis && lenis.stop();
 
-  // Hero starting state
-  gsap.set(".wordmark__big .ch", { yPercent: 110 });
-  gsap.set(".wordmark__small .ch", { yPercent: 110 });
-  gsap.set(".wordmark__small .rule", { scaleX: 0 });
-  gsap.set([".hero__eyebrow", ".hero__sub", ".scroll-cue"], { opacity: 0, y: 16 });
-  gsap.set(".stage", { y: 120, opacity: 0 });
-  gsap.set(".beams i", { opacity: 0 });
-  // header parts fade in on their own; a transform on .top would trap the phone's fixed pill bar
-  gsap.set([".brand", ".pill", ".tenure-tag"], { opacity: 0 });
+  // Cover starting state: header parts fade in on their own (a transform on .top would trap fixed children)
+  gsap.set(".mast__word .ch", { yPercent: 115 });
+  gsap.set(".mast__region .ch", { yPercent: 115 });
+  gsap.set([".cover__kicker", ".cover__bar", ".mast__lead"], { opacity: 0, y: 18 });
+  gsap.set(".rc", { yPercent: 28, opacity: 0 });
+  gsap.set(".cover__plan", { opacity: 0, scale: 1.08 });
+  gsap.set([".brand", ".top__right"], { opacity: 0 });
 
+  // The lead rises first, the rest follow outwards from the middle
+  const rcs = $$(".rc"), leadIdx = Math.max(0, rcs.findIndex((r) => r.classList.contains("is-lead")));
   const intro = () => {
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-    tl.to(".beams i", { opacity: (i) => [.55, .8, 1, .8, .55][i], duration: 2.2, stagger: .08, ease: "power2.out" }, 0)
-      .to(".wordmark__big .ch", { yPercent: 0, duration: 1.5, stagger: .045 }, .15)
-      .to(".wordmark__small .rule", { scaleX: 1, duration: 1.4 }, .6)
-      .to(".wordmark__small .ch", { yPercent: 0, duration: 1.1, stagger: .05 }, .7)
-      .to(".hero__eyebrow", { opacity: 1, y: 0, duration: 1.2 }, .5)
-      .to(".hero__sub", { opacity: 1, y: 0, duration: 1.2 }, .9)
-      .to(".stage", { y: 0, opacity: 1, duration: 1.8 }, .8)
-      .to([".brand", ".pill", ".tenure-tag"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
-      .to(".scroll-cue", { opacity: 1, y: 0, duration: 1 }, 1.4);
+    tl.to(".cover__plan", { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0)
+      .to(".mast__word .ch", { yPercent: 0, duration: 1.5, stagger: .045 }, .1)
+      .to(".mast__region .ch", { yPercent: 0, duration: 1.2, stagger: .05 }, .55)
+      .to(".cover__kicker", { opacity: 1, y: 0, duration: 1.2 }, .4)
+      .to(".mast__lead", { opacity: 1, y: 0, duration: 1.2 }, 1.1)
+      .to(rcs, { yPercent: 0, opacity: 1, duration: 1.7, stagger: (i) => Math.abs(i - leadIdx) * .12 }, .6)
+      .to([".brand", ".top__right"], { opacity: 1, duration: 1.2, stagger: .08, clearProps: "opacity" }, 1)
+      .to(".cover__bar", { opacity: 1, y: 0, duration: 1.1 }, 1.3);
   };
 
-  // Loader: count to 100 while the hero image and fonts settle
+  // Loader: count to 100 while the lead portrait and fonts settle
   const countEl = $("#loaderCount");
+  const waitImg = (im) => new Promise((r) => { if (!im || im.complete) return r(); im.onload = im.onerror = r; });
   const ready = Promise.all([
     document.fonts ? document.fonts.ready : Promise.resolve(),
-    new Promise((r) => { const im = $(".stage img"); im.complete ? r() : (im.onload = im.onerror = r); })
+    waitImg($(".rc.is-lead .rc__img"))
   ]);
   const prog = { v: 0 };
   gsap.to(".loader__seal circle", { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut" });
@@ -451,10 +552,20 @@
   });
   gsap.set(loader, { clipPath: "inset(0 0 0% 0)" });
 
-  // Stage flattens as you scroll, like a screen being lowered into view
-  gsap.to(".stage__frame", { rotateX: 0, scale: 1, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom 30%", scrub: true } });
-  gsap.to(".stage__frame img", { scale: 1, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-  gsap.to(".hero__copy", { y: -80, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "60% top", scrub: true } });
+  // Leaving the cover: the masthead drifts up behind the council, which sinks slightly (depth)
+  const coverST = { trigger: "#hero", start: "top top", end: "bottom top", scrub: true };
+  gsap.to(".cover__head", { yPercent: -18, opacity: .35, ease: "none", scrollTrigger: coverST });
+  gsap.to(".council", { y: 70, ease: "none", scrollTrigger: coverST });
+  gsap.to(".cover__plan", { yPercent: 10, ease: "none", scrollTrigger: coverST });
+
+  // The reel opens from a framed print to full bleed
+  gsap.fromTo(".reel__frame", { clipPath: "inset(8% 16% 8% 16% round 28px)" }, {
+    clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none",
+    scrollTrigger: { trigger: "#reel", start: "top 85%", end: "center 55%", scrub: true }
+  });
+  gsap.fromTo(".reel__frame img", { yPercent: -12 }, {
+    yPercent: 0, ease: "none", scrollTrigger: { trigger: "#reel", start: "top bottom", end: "bottom top", scrub: true }
+  });
 
   // Statement lights up word by word
   gsap.to(".statement .w", {
@@ -484,16 +595,16 @@
   });
 
   // Cards: unmask from below
-  ScrollTrigger.batch(".mcard, .house, .otile, .prow, .night, .map__list li", {
+  ScrollTrigger.batch(".mcard, .house, .hfeat, .otile, .prow, .night, .map__list li", {
     start: "top 92%",
     onEnter: (els) => gsap.fromTo(els, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, stagger: .06, ease: "expo.out", overwrite: true })
   });
-  gsap.set(".mcard, .house, .otile, .prow, .night, .map__list li", { opacity: 0 });
+  gsap.set(".mcard, .house, .hfeat, .otile, .prow, .night, .map__list li", { opacity: 0 });
 
   // Spotlight rail drifts sideways as the section passes
-  const rail = $("#spotRail");
-  gsap.fromTo(rail, { x: () => innerWidth * .15 }, {
-    x: () => -(rail.scrollWidth - innerWidth * .85), ease: "none",
+  const spotRail = $("#spotRail");
+  gsap.fromTo(spotRail, { x: () => innerWidth * .15 }, {
+    x: () => -(spotRail.scrollWidth - innerWidth * .85), ease: "none",
     scrollTrigger: { trigger: ".spot", start: "top bottom", end: "bottom top", scrub: true, invalidateOnRefresh: true }
   });
   gsap.from(".spot__title span, .spot__title em", { yPercent: 60, opacity: 0, duration: 1.5, stagger: .12, ease: "expo.out", scrollTrigger: { trigger: ".spot__title", start: "top 85%" } });
