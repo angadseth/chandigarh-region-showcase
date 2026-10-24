@@ -731,8 +731,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .lb__close { justify-self: end; padding: 9px 16px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 13.5px; }
 .lb__close:hover { background: var(--ivory); color: var(--ink); }
 .lb__stage { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; min-height: 0; }
-.lb__fig { margin: 0; height: 100%; min-height: 0; display: grid; place-items: center; }
-.lb__fig img { max-height: calc(100vh - 230px); max-height: calc(100svh - 230px); max-width: 100%; width: auto; object-fit: contain; border-radius: 14px; }
+/* a fixed frame: photos of any shape cross inside it without the page around them moving */
+.lb__fig { position: relative; margin: 0; height: calc(100vh - 230px); height: calc(100svh - 230px); min-height: 0; }
+.lb__img { position: absolute; inset: 0; margin: auto; max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; border-radius: 14px; will-change: transform, opacity; }
 .lb__nav { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 18px; transition: background .3s, color .3s; }
 .lb__nav:hover { background: var(--ivory); color: var(--ink); }
 .lb__info { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; }
