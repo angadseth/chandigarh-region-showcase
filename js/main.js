@@ -215,8 +215,14 @@
   const ICONS = {
     Portfolio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3z"/></svg>`,
     LinkedIn: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>`,
-    GitHub: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`
+    GitHub: `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>`,
+    Instagram: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r=".6" fill="currentColor"/></svg>`,
+    Email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>`
   };
+  // each coordinator's own links: Angad's from the credit, everyone else's from their house
+  const linksOf = (hs) => hs.featured ? D.credit.links
+    : [...(hs.links || []), ...(hs.mail ? [["Email", `mailto:${hs.mail}@ds.study.iitm.ac.in`]] : [])];
+  const anchor = (t, u, inner) => `<a href="${u}"${u.startsWith("mailto:") ? "" : ' target="_blank" rel="noopener"'} aria-label="${t}" title="${t}">${inner}</a>`;
   const linkRow = (cls) => `<div class="${cls}">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t} ↗</a>`).join("")}</div>`;
   $$("[data-count-inline]").forEach((n) => (n.textContent = counts[n.dataset.countInline]));
 
@@ -239,7 +245,7 @@
       <div class="plate__txt">
         <span class="plate__k"><i id="stageNo"></i><em id="stageHouse"></em></span>
         <b class="plate__name" id="stageRc"></b>
-        <div class="plate__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${ICONS[t] || ""}${t}</a>`).join("")}</div>
+        <div class="plate__links"></div>
       </div>
     </div>`);
   const plate = $(".plate"), floatCrest = $(".plate__crest"), plateLinks = $(".plate__links");
@@ -339,7 +345,9 @@
   const dress = () => {
     const hs = cast[active];
     floatCrest.src = `assets/houses/${hs.id}.webp`;
-    plateLinks.hidden = !hs.featured;
+    const own = linksOf(hs);
+    plateLinks.hidden = !own.length;
+    plateLinks.innerHTML = own.map(([t, u]) => anchor(t, u, `${ICONS[t] || ""}${t}`)).join("");
     $("#stageNo").textContent = `${dd(active + 1)} / ${dd(cast.length)}`;
     $("#stageHouse").textContent = `${hs.name} House`;
     $("#stageRc").innerHTML = [...(hs.short || hs.rc)].map((c) => `<span class="chw"><span class="ch">${c === " " ? "&nbsp;" : c}</span></span>`).join("");
@@ -519,13 +527,13 @@
 
   /* ---------- Houses ---------- */
   const crest = (hs) => `assets/houses/${hs.id}.webp`;
-  const iconLinks = `<div class="house__links">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener" aria-label="${t}" title="${t}">${ICONS[t] || t}</a>`).join("")}</div>`;
+  const iconLinks = (hs) => { const own = linksOf(hs); return own.length ? `<div class="house__links">${own.map(([t, u]) => anchor(t, u, ICONS[t] || t)).join("")}</div>` : ""; };
   $("#housesGrid").append(...byPhoto.map((hs) => {
     const media = hs.photo
       ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
       : `<div class="house__stage house__stage--crest"><img class="house__crest" src="${crest(hs)}" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
     return h("article", { class: "house" + (hs.photo ? " has-photo" : "") + (hs.featured ? " is-first" : ""), style: `--tint:${hs.tint || "#d6b36f"}` },
-      `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div>${hs.featured ? iconLinks : ""}</div>`);
+      `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div>${iconLinks(hs)}</div>`);
   }));
 
   /* ---------- The Wall ---------- */
