@@ -327,8 +327,13 @@
       if (hasGsap) gsap.set(f, to);
       else Object.assign(f.style, { transform: `translateX(-50%) translateX(${x}px) scale(${s.scale})`, opacity: s.opacity });
     } else if (how === "jump") {
-      // crossing behind the stage would look wrong: fade out, reappear on the far side
-      gsap.timeline().to(f, { opacity: 0, duration: .5, ease: "sine.in", overwrite: "auto" }).set(f, { ...to, opacity: 0 }).to(f, { opacity: s.opacity, duration: .9, ease: "sine.out" }, "+=.15");
+      // crossing behind the stage would look wrong: whoever leaves keeps walking out of the frame
+      // on their own side, and comes back in from beyond the far edge, like the next print in a gallery
+      const was = +gsap.getProperty(f, "opacity") > .01, out = (d) => Math.sign(d) * (geo.W / 2 + f._w * s.scale * .7);
+      const tl = gsap.timeline({ overwrite: "auto" });
+      if (was) tl.to(f, { x: out(f._from), opacity: 0, duration: s.opacity ? MOVE / 2 : MOVE, ease: s.opacity ? "power2.in" : "power2.inOut" });
+      tl.set(f, { ...to, x: out(s.d), opacity: 0 });
+      if (s.opacity) tl.to(f, { x, opacity: s.opacity, duration: was ? MOVE / 2 : MOVE, ease: was ? "power2.out" : "power2.inOut" });
     } else gsap.to(f, { ...to, duration: MOVE, ease: "power2.inOut", overwrite: "auto" });
   };
   const dress = () => {
@@ -383,7 +388,8 @@
     arrange(next);
     figs.forEach((f, i) => {
       const d0 = dist(i, prev), d1 = dist(i, next);
-      place(f, Math.abs(d1 - d0) > 1 ? "jump" : "move");
+      f._from = d0;
+      place(f, d0 * d1 < 0 && Math.abs(d1 - d0) > 1 ? "jump" : "move");
     });
     if (revealCall) revealCall.kill();
     // the names of the ones waiting come back only once everyone has stopped moving
@@ -545,20 +551,57 @@
   if (wallCount) wallCount.textContent = all.length;
 
   /* ---------- Lightbox ---------- */
-  const lb = $("#lb"), lbImg = $("#lbImg");
-  let cur = { i: 0, p: 1 }, lastFocus = null;
-  const lbShow = () => {
+  const lb = $("#lb"), lbFig = $(".lb__fig"), lbInfo = $$(".lb__info > *");
+  const lbMotion = hasGsap && !reduced;
+  let cur = { i: 0, p: 1 }, lastFocus = null, lbTurn = 0;
+  // the photo before or after this one, running on into the next meetup
+  const beside = ({ i, p }, dir) => {
+    const N = D.meetups.length;
+    p += dir;
+    if (p > D.meetups[i].photos) { do i = (i + 1) % N; while (!D.meetups[i].photos); p = 1; }
+    if (p < 1) { do i = (i - 1 + N) % N; while (!D.meetups[i].photos); p = D.meetups[i].photos; }
+    return { i, p };
+  };
+  const caption = () => {
     const m = D.meetups[cur.i];
     const { y, m: mo, d } = parse(m.date);
-    lbImg.src = photo(m, cur.p, false);
-    lbImg.alt = `${m.place}, ${m.city}, photo ${cur.p}`;
     $("#lbDate").textContent = `${dd(d)} ${MONTHS[mo - 1]} ${y} · ${m.kind}${m.no ? " · Meetup #" + m.no : ""}`;
     $("#lbTitle").textContent = `${m.city} — ${m.place}`;
     $("#lbNote").textContent = m.note;
     $("#lbCount").textContent = `${dd(cur.p)} / ${dd(m.photos)}`;
     $("#lbIg").hidden = !m.ig;
     if (m.ig) $("#lbIg").href = `https://www.instagram.com/p/${m.ig}/`;
-    if (hasGsap && !reduced) gsap.fromTo(lbImg, { opacity: 0, scale: .98 }, { opacity: 1, scale: 1, duration: .5, ease: "expo.out" });
+  };
+  // like turning to the next print in a gallery: the new photo is decoded first, then the old one
+  // drifts out one way while the new one glides in from the other, so nothing blinks or jumps
+  const lbShow = (dir = 0) => {
+    const m = D.meetups[cur.i], turn = ++lbTurn, sameMeetup = lbFig.dataset.i === String(cur.i);
+    const img = new Image();
+    img.className = "lb__img";
+    img.alt = `${m.place}, ${m.city}, photo ${cur.p}`;
+    img.src = photo(m, cur.p, false);
+    (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => {
+      if (turn !== lbTurn) return; // a newer turn already started
+      const old = $$(".lb__img", lbFig);
+      lbFig.dataset.i = cur.i;
+      lbFig.append(img);
+      if (!lbMotion || !dir) {
+        old.forEach((o) => o.remove());
+        caption();
+        if (lbMotion) gsap.fromTo(img, { opacity: 0, scale: .97 }, { opacity: 1, scale: 1, duration: .7, ease: "power3.out" });
+        return;
+      }
+      const shift = Math.min(90, innerWidth * .06) * dir;
+      gsap.to(old, { opacity: 0, x: -shift, scale: .985, duration: .6, ease: "power2.inOut", overwrite: true, onComplete: () => old.forEach((o) => o.remove()) });
+      gsap.fromTo(img, { opacity: 0, x: shift, scale: 1.01 }, { opacity: 1, x: 0, scale: 1, duration: .75, ease: "power3.out", delay: .1 });
+      if (sameMeetup) caption();
+      else gsap.to(lbInfo, { opacity: 0, y: -6, duration: .25, ease: "sine.in", overwrite: true, onComplete: () => {
+        caption();
+        gsap.fromTo(lbInfo, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .5, stagger: .06, ease: "power2.out" });
+      } });
+    });
+    // fetch both neighbours now so the next turn never waits on the network
+    [1, -1].forEach((k) => { const n = beside(cur, k); new Image().src = photo(D.meetups[n.i], n.p, false); });
   };
   const lbOpen = (i, p = 1) => {
     cur = { i: +i, p: +p };
@@ -566,27 +609,25 @@
     lb.hidden = false;
     lenis && lenis.stop();
     document.body.style.overflow = "hidden";
+    if (lbMotion) gsap.fromTo(lb, { opacity: 0 }, { opacity: 1, duration: .4, ease: "sine.out", overwrite: true });
+    lbFig.dataset.i = "";
     lbShow();
     $("#lbClose").focus();
   };
   const lbClose = () => {
-    lb.hidden = true;
-    lenis && lenis.start();
-    document.body.style.overflow = "";
-    lastFocus && lastFocus.focus();
+    const done = () => {
+      lb.hidden = true;
+      $$(".lb__img", lbFig).forEach((o) => o.remove());
+      lenis && lenis.start();
+      document.body.style.overflow = "";
+      lastFocus && lastFocus.focus();
+    };
+    lbTurn++;
+    lbMotion ? gsap.to(lb, { opacity: 0, duration: .3, ease: "sine.in", overwrite: true, onComplete: done }) : done();
   };
   const step = (dir) => {
-    const N = D.meetups.length;
-    cur.p += dir;
-    if (cur.p > D.meetups[cur.i].photos) {
-      do cur.i = (cur.i + 1) % N; while (!D.meetups[cur.i].photos);
-      cur.p = 1;
-    }
-    if (cur.p < 1) {
-      do cur.i = (cur.i - 1 + N) % N; while (!D.meetups[cur.i].photos);
-      cur.p = D.meetups[cur.i].photos;
-    }
-    lbShow();
+    cur = beside(cur, dir);
+    lbShow(dir);
   };
   document.addEventListener("click", (e) => {
     const t = e.target.closest("[data-i]");
