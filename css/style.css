@@ -209,8 +209,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .mast__word .ch {
   background: linear-gradient(180deg, #fffaf0 0%, #ece2cd 50%, #9f9583 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .04em;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  /* the gradient only paints inside the letter's box: give the g's tail room below the tight line */
+  padding-bottom: .26em; margin-bottom: -.26em;
 }
+.mast__word .chw { padding-bottom: .28em; margin-bottom: -.28em; }
 .mast__region {
   position: absolute; left: 0; top: 100%; margin-top: .1em; z-index: 1;
   font-family: var(--serif); font-style: italic; font-size: clamp(34px, min(5.4vw, 9.5vh), 96px); letter-spacing: -.02em; line-height: 1; color: var(--gold);
