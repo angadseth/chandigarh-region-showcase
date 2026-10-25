@@ -1,0 +1,6 @@
+# Text files are stored with LF; Windows checkouts convert as usual.
+* text=auto
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
