@@ -807,3 +807,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .marquee { transform: none; }
   .statement .w { opacity: 1; }
 }
+
+/* skip-to-content link: keyboard users jump past the header; hidden until focused */
+.skip { position: fixed; left: 16px; top: -60px; z-index: 1000; padding: 10px 16px; border-radius: 999px; background: var(--ivory); color: var(--ink); font-size: 14px; transition: top .2s; }
+.skip:focus-visible { top: 16px; }
