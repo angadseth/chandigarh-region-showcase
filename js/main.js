@@ -30,6 +30,7 @@
   $$("[data-credit-org]").forEach((n) => (n.textContent = D.credit.org));
   $$("[data-credit-role]").forEach((n) => (n.textContent = D.credit.role));
   $$("[data-credit-link]").forEach((n) => { n.href = D.credit.url; n.target = "_blank"; n.rel = "noopener"; });
+  $$("[data-credit-links]").forEach((n) => (n.innerHTML = D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t} ↗</a>`).join("")));
 
   /* ---------- Seal ---------- */
   const seal = $("#seal");
