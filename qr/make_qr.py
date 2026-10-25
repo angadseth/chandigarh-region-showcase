@@ -3,6 +3,7 @@
     python qr/make_qr.py      (run from the repo root)
 
 Writes qr/out/: qr-tile.svg + qr-tile.png (just the code on its ivory panel, transparent corners),
+qr-tile-white.svg/.png (same on plain white, for printing),
 qr-card.png (portrait card with the masthead), and checks that both scan.
 Dark modules on ivory so every phone camera reads it; error level H so the logo in the middle is safe."""
 import base64
@@ -88,6 +89,9 @@ tile = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {S} {S}" width="
 <image href="data:image/webp;base64,{logo}" x="{c0 - R * .74}" y="{c0 - R * .74}" width="{R * 1.48}" height="{R * 1.48}"/>
 </svg>'''
 (out / "qr-tile.svg").write_text(tile, encoding="utf8")
+# plain white panel for printers and light posters (cream can print muddy on cheap paper)
+tile_white = tile.replace('fill="url(#paper)"', 'fill="#ffffff"')
+(out / "qr-tile-white.svg").write_text(tile_white, encoding="utf8")
 
 card = f'''<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=block">
@@ -123,6 +127,8 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 1600, "height": 1600}, device_scale_factor=1)
     pg.set_content(f'<html><body style="margin:0;background:transparent">{tile}</body></html>')
     pg.locator("svg").first.screenshot(path=str(out / "qr-tile.png"), omit_background=True)
+    pg.set_content(f'<html><body style="margin:0;background:transparent">{tile_white}</body></html>')
+    pg.locator("svg").first.screenshot(path=str(out / "qr-tile-white.png"), omit_background=True)
     pg = b.new_page(viewport={"width": 1000, "height": 1290}, device_scale_factor=2)
     pg.goto((out / "card.html").as_uri(), wait_until="networkidle")
     pg.wait_for_timeout(800)
@@ -130,7 +136,7 @@ with sync_playwright() as p:
     b.close()
 
 det, wx = cv2.QRCodeDetector(), cv2.wechat_qrcode_WeChatQRCode()
-for f in ["qr-tile.png", "qr-card.png"]:
+for f in ["qr-tile.png", "qr-tile-white.png", "qr-card.png"]:
     im = cv2.imread(str(out / f), cv2.IMREAD_UNCHANGED)
     if im.shape[2] == 4:  # flatten transparency onto white
         a = im[..., 3:] / 255.0
