@@ -14,6 +14,7 @@ What the Chandigarh Region of the IIT Madras BS Degree did this tenure: 32 offli
 - **Map** of all nineteen meetup cities, drawn from Chandigarh outwards
 - **Houses**: all ten crests with their Regional Coordinators, Pichavaram first; houses still waiting on a photo come last
 - **The Wall**: every photo, on a slow two-row marquee
+- **Footer**: one quiet credit line with Portfolio, LinkedIn and GitHub buttons
 
 ## Editing content
 
