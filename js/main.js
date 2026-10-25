@@ -529,7 +529,7 @@
   const iconLinks = (hs) => { const own = linksOf(hs); return own.length ? `<div class="house__links">${own.map(([t, u]) => anchor(t, u, ICONS[t] || t)).join("")}</div>` : ""; };
   $("#housesGrid").append(...byPhoto.map((hs) => {
     const media = hs.photo
-      ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}" loading="lazy"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
+      ? `<div class="house__stage"><img class="house__ghost" src="${crest(hs)}" alt="" aria-hidden="true"><img class="house__person" src="${hs.photo}" alt="${hs.rc}, ${hs.name} House" loading="lazy" decoding="async"><img class="house__badge" src="${crest(hs)}" alt="${hs.name} House crest"></div>`
       : `<div class="house__stage house__stage--crest"><img class="house__crest" src="${crest(hs)}" alt="${hs.name} House crest" loading="lazy" width="320" height="320"></div>`;
     return h("article", { class: "house" + (hs.photo ? " has-photo" : "") + (hs.featured ? " is-first" : ""), style: `--tint:${hs.tint || "#d6b36f"}` },
       `${media}<div class="house__body"><div class="house__name">${hs.name}</div><div class="house__role">Regional Coordinator</div><div class="house__rc">${hs.rc}</div>${iconLinks(hs)}</div>`);
