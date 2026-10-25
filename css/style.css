@@ -718,6 +718,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .foot__name a:hover { background-size: 100% 1px; }
 .foot__org { margin: 8px 0 0; font-family: var(--mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
 .foot__meta { text-align: right; color: var(--mute); font-size: 14px; }
+/* the credit is one quiet line at the side, not a headline (Angad, 25 Oct) */
+.foot__by { margin: 0; align-self: flex-end; color: var(--mute); font-size: 13px; letter-spacing: .01em; }
+.foot__by a { color: var(--ivory-2); background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .6s var(--ease), color .3s; }
+.foot__by a:hover { color: var(--ivory); background-size: 100% 1px; }
 .foot__meta p { margin: 0 0 4px; }
 .totop { display: inline-block; margin-top: 14px; padding: 10px 16px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ivory); font-size: 13.5px; transition: background .4s, color .4s; }
 .totop:hover { background: var(--ivory); color: var(--ink); }

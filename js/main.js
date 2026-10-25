@@ -223,7 +223,6 @@
   const linksOf = (hs) => hs.featured ? D.credit.links
     : [...(hs.links || []), ...(hs.mail ? [["Email", `mailto:${hs.mail}@ds.study.iitm.ac.in`]] : [])];
   const anchor = (t, u, inner) => `<a href="${u}"${u.startsWith("mailto:") ? "" : ' target="_blank" rel="noopener"'} aria-label="${t}" title="${t}">${inner}</a>`;
-  const linkRow = (cls) => `<div class="${cls}">${D.credit.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t} ↗</a>`).join("")}</div>`;
   $$("[data-count-inline]").forEach((n) => (n.textContent = counts[n.dataset.countInline]));
 
   // The council: every coordinator with a cut-out, in house order, turning like a slow carousel.
@@ -458,7 +457,6 @@
     if (i >= 0) a.addEventListener("click", (e) => { e.preventDefault(); go(i); });
     return a;
   }));
-  $$(".foot__credit").forEach((n) => n.insertAdjacentHTML("beforeend", linkRow("foot__links")));
 
   /* ---------- Reel: landmarks of the region ---------- */
   // one photo dissolves into the next while it slowly drifts closer; every one is credited
