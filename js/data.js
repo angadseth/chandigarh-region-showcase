@@ -132,7 +132,7 @@ window.CRS = {
     { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, links: [], mail: "25f2005978", tint: "#c47a4a" },
     { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", head: [0.491, 0.293, 0.234], links: [["Instagram", "https://www.instagram.com/__himans_u/"]], mail: "25f2000396", tint: "#7b3fe0" },
     { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: "assets/people/corbett.webp", head: [0.535, 0.296, 0.206], links: [["LinkedIn", "https://www.linkedin.com/in/khush-agrawal-732892366/"]], mail: "24f3000972", tint: "#c39a2e" },
-    { id: "wayanad", name: "Wayanad", rc: "❄️Sagar Rathore❄️", photo: "assets/people/wayanad.webp", cover: false, head: [0.496, 0.22, 0.17], links: [["LinkedIn", "https://www.linkedin.com/in/sagar-rathor-a6b98137b/"]], mail: "25f2003321", tint: "#2f95b8" },
+    { id: "wayanad", name: "Wayanad", rc: "❄️Sagar Rathore❄️", photo: "assets/people/wayanad.webp", head: [0.496, 0.22, 0.17], links: [["LinkedIn", "https://www.linkedin.com/in/sagar-rathor-a6b98137b/"]], mail: "25f2003321", tint: "#2f95b8" },
     { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: "assets/people/saranda.webp", head: [0.457, 0.31, 0.2], links: [["Instagram", "https://www.instagram.com/mr_vishal__rj06/"]], mail: "24f3001182", tint: "#a88a4a" }
   ]
 };
