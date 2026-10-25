@@ -127,12 +127,12 @@ window.CRS = {
       line: "Designed and built this showcase. Hosted the region's first-ever Sikar meetup, Jantar Mantar and the Albert Hall photowalk." },
     { id: "kaziranga", name: "Kaziranga", rc: "Abhimanyu Kumar Patel", short: "Abhimanyu", photo: "assets/people/abhimanyu.webp", head: [0.47, 0.3, 0.25], links: [["Instagram", "https://www.instagram.com/abhimanyu.142857/"]], mail: "24f3002949", tint: "#2a7a5c" },
     { id: "sundarbans", name: "Sundarbans", rc: "Prashansa Uniyal", photo: null, links: [], mail: "26f2001093", tint: "#c8873a" },
-    { id: "nallamala", name: "Nallamala", rc: "Akshi", photo: "assets/people/nallamala.webp", head: [0.537, 0.3, 0.28], links: [], mail: "25f3005020", tint: "#8a5a7a" },
+    { id: "nallamala", name: "Nallamala", rc: "Akshi", photo: "assets/people/nallamala.webp", head: [0.43, 0.39, 0.32], links: [], mail: "25f3005020", tint: "#8a5a7a" },
     { id: "bandipur", name: "Bandipur", rc: "Jiyaa", photo: "assets/people/bandipur.webp", head: [0.51, 0.34, 0.2], links: [], mail: "25f2007467", tint: "#3b7fc4" },
     { id: "kanha", name: "Kanha", rc: "Manisha", photo: null, links: [], mail: "25f2005978", tint: "#c47a4a" },
     { id: "namdapha", name: "Namdapha", rc: "Himanshu", photo: "assets/people/himanshu.webp", head: [0.491, 0.293, 0.234], links: [["Instagram", "https://www.instagram.com/__himans_u/"]], mail: "25f2000396", tint: "#7b3fe0" },
     { id: "corbett", name: "Corbett", rc: "Khush Agrawal", photo: "assets/people/corbett.webp", head: [0.535, 0.296, 0.206], links: [["LinkedIn", "https://www.linkedin.com/in/khush-agrawal-732892366/"]], mail: "24f3000972", tint: "#c39a2e" },
-    { id: "wayanad", name: "Wayanad", rc: "❄️Sagar Rathore❄️", photo: null, links: [["LinkedIn", "https://www.linkedin.com/in/sagar-rathor-a6b98137b/"]], mail: "25f2003321", tint: "#2f95b8" },
+    { id: "wayanad", name: "Wayanad", rc: "❄️Sagar Rathore❄️", photo: "assets/people/wayanad.webp", cover: false, head: [0.48, 0.42, 0.3], links: [["LinkedIn", "https://www.linkedin.com/in/sagar-rathor-a6b98137b/"]], mail: "25f2003321", tint: "#2f95b8" },
     { id: "saranda", name: "Saranda", rc: "Vishal Salvi", photo: "assets/people/saranda.webp", head: [0.457, 0.31, 0.2], links: [["Instagram", "https://www.instagram.com/mr_vishal__rj06/"]], mail: "24f3001182", tint: "#a88a4a" }
   ]
 };
