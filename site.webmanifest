@@ -1,0 +1,14 @@
+{
+  "name": "Chandigarh Region Showcase",
+  "short_name": "Chandigarh Region",
+  "description": "What the Chandigarh Region of the IIT Madras BS Degree did this tenure.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0a09",
+  "theme_color": "#0b0a09",
+  "icons": [
+    { "src": "assets/img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/img/favicon.png", "type": "image/png" }
+  ]
+}
