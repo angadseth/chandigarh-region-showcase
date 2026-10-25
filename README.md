@@ -24,6 +24,10 @@ Everything on the page comes from [`js/data.js`](js/data.js):
 - Change the reel's landmarks: edit the list in `scripts/fetch_monuments.py`, run it, and copy the credits it prints into `monuments`.
 - Add a meetup: add an entry to `meetups`, then run `python scripts/fetch_instagram.py <post-id>` to pull its photos. A meetup with `photos: 0` shows as a "photos coming" card.
 
+## QR code for posters
+
+Ready-made files are in [`qr/out`](qr/out): a finished card, the code on its own, and a white print version. See [`qr/README.md`](qr/README.md) for sizes and printing.
+
 ## Photo credits
 
 Landmark photos in the reel are from Wikimedia Commons:
