@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://angadseth.github.io/chandigarh-region-showcase/sitemap.xml
